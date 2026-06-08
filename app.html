@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Clickable Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-2:#1A1A1A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line:#ECECEC; --line-sand:#E3DED4;
+    --accent:#007AFF; --accent-press:#0062CC; --oxblood:#9B2C2C;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--sans); color:var(--ink); background:#E5DFD3; min-height:100vh; padding:34px 20px 60px; display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .topbar{display:flex; align-items:center; gap:14px;}
+  .rolechip{font-size:11px; letter-spacing:.18em; text-transform:uppercase; font-weight:700; color:#fff; background:var(--ink); padding:6px 12px; border-radius:100px;}
+  .rolechip.buyer{background:var(--accent);}
+  .restart{font-size:12px; color:#8f8a7e; letter-spacing:.04em; cursor:pointer; border:1px solid #cfc8ba; padding:6px 12px; border-radius:100px; background:transparent;}
+  .hint{font-family:var(--serif); font-style:italic; font-size:14px; color:#8f8a7e; text-align:center; max-width:380px;}
+
+  .phone{width:390px; height:844px; background:var(--sand); border-radius:46px; box-shadow:0 2px 2px rgba(0,0,0,.04), 0 30px 60px -20px rgba(40,35,25,.45); position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.06); display:flex; flex-direction:column;}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--ink); border-radius:18px; z-index:20;}
+  .statusbar{height:54px; flex:0 0 54px; display:flex; align-items:center; justify-content:space-between; padding:0 30px 0 34px; font-size:15px; font-weight:600; z-index:15; position:relative;}
+  .statusbar .icons{display:flex; gap:6px; font-size:13px;}
+  .stage{flex:1; position:relative; overflow:hidden;}
+  .view{position:absolute; inset:0; display:none; flex-direction:column; overflow:hidden;}
+  .view.active{display:flex;}
+
+  .eyebrow{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .clk{cursor:pointer;}
+
+  /* avatars */
+  .av{border-radius:50%; background:linear-gradient(135deg,#c9bda8,#8a7d63); flex:0 0 auto; position:relative; overflow:hidden;}
+  .av img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .av.b{background:linear-gradient(135deg,#a9b3bd,#5f6b78);}
+  .av.c{background:linear-gradient(135deg,#cdbba9,#9a7c63);}
+  .av.d{background:linear-gradient(135deg,#bcae93,#7d7458);}
+  .av.e{background:linear-gradient(135deg,#b7b1c2,#6f6982);}
+  /* photo placeholders */
+  .photo{background:radial-gradient(60px 40px at 30% 60%,rgba(255,196,120,.55),transparent 70%),radial-gradient(50px 36px at 70% 55%,rgba(255,210,150,.5),transparent 70%),linear-gradient(180deg,#6b7689 0%,#4a5163 38%,#2b2c33 78%,#1c1c20 100%);}
+  .photo.b{background:radial-gradient(70px 40px at 64% 58%,rgba(255,190,120,.5),transparent 70%),linear-gradient(180deg,#9aa1a6 0%,#5d6168 45%,#2e2f33 100%);}
+  .photo.c{background:radial-gradient(50px 40px at 40% 55%,rgba(255,200,130,.5),transparent 70%),linear-gradient(165deg,#b9a98c 0%,#6d6353 50%,#2c2a26 100%);}
+
+  /* ===== ROSTER ===== */
+  .r-head{padding:6px 24px 0;}
+  .r-top{display:flex; align-items:flex-start; justify-content:space-between;}
+  .r-title{font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-.015em; margin-top:6px;}
+  .newbtn{margin-top:14px; width:34px; height:34px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:300;}
+  .search{display:flex; align-items:center; gap:9px; margin-top:18px; background:var(--paper); border:1px solid var(--line-sand); border-radius:12px; padding:10px 14px; color:var(--ink-40); font-size:14.5px;}
+  .search svg{width:15px; height:15px;}
+  .group-lab{font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:600; padding:22px 26px 2px;}
+  .list{flex:1; overflow-y:auto; padding:6px 14px 0;}
+  .buyer{display:flex; align-items:center; gap:13px; background:var(--paper); border:1px solid var(--line-sand); border-radius:18px; padding:13px 14px; margin-bottom:11px;}
+  .buyer .av{width:44px; height:44px;}
+  .buyer .info{flex:1; min-width:0;}
+  .buyer .name{font-size:16px; font-weight:600; letter-spacing:-.01em;}
+  .buyer .meta{font-size:12.5px; color:var(--ink-60); margin-top:3px;}
+  .pill{font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:100px;}
+  .pill.today{background:var(--accent); color:#fff;}
+  .pill.soon{color:var(--accent); border:1px solid rgba(0,122,255,.4);}
+  .pill.new{background:var(--sand-2); color:var(--ink-60);}
+  .chev{color:var(--ink-40); font-size:18px;}
+  .tabbar{flex:0 0 64px; background:var(--paper); border-top:1px solid var(--line-sand); display:flex; align-items:flex-start; padding-top:9px;}
+  .tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--ink-40); font-size:10px;}
+  .tab.on{color:var(--ink);}
+  .tab svg{width:23px; height:23px;}
+
+  /* ===== TOUR BUILDER ===== */
+  .pap{background:var(--paper);}
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:0 18px 6px;}
+  .nav .back{color:var(--accent); font-size:16px;}
+  .nav .rt{color:var(--ink-40); font-size:14px;}
+  .b-head{padding:6px 24px 0;}
+  .b-title{font-family:var(--serif); font-size:32px; font-weight:400; letter-spacing:-.015em; margin-top:6px;}
+  .datepick{display:flex; align-items:center; gap:7px; margin-top:12px; color:var(--accent); font-size:14.5px; font-weight:500;}
+  .datepick svg{width:15px; height:15px;}
+  .addrow{display:flex; align-items:center; gap:10px; margin:18px 20px 6px; background:var(--sand); border:1px solid var(--line-sand); border-radius:13px; padding:13px 14px; color:var(--ink-40); font-size:14.5px;}
+  .addrow svg{width:16px; height:16px; color:var(--accent);}
+  .b-body{flex:1; overflow-y:auto; padding:6px 0 0;}
+  .stoplist{padding:0 20px;}
+  .bstop{display:flex; align-items:center; gap:13px; padding:14px 0; border-bottom:1px solid var(--line);}
+  .bstop .num{font-family:var(--serif); font-size:18px; color:var(--ink-40); width:18px; text-align:center; flex:0 0 18px;}
+  .bstop .binfo{flex:1; min-width:0;}
+  .bstop .baddr{font-size:15px; font-weight:600; letter-spacing:-.01em;}
+  .bstop .bmeta{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .bstop .handle{display:flex; flex-direction:column; gap:3px; padding-left:6px;}
+  .bstop .handle span{display:block; width:17px; height:1.5px; background:var(--ink-40); border-radius:2px;}
+  .b-foot{flex:0 0 auto; padding:14px 20px 22px; border-top:1px solid var(--line); background:var(--paper);}
+  .cta{display:block; width:100%; text-align:center; background:var(--ink); color:#fff; font-size:16px; font-weight:600; padding:15px; border-radius:14px;}
+  .cta-sub{display:block; text-align:center; color:var(--accent); font-size:14px; font-weight:500; margin-top:13px;}
+
+  /* ===== BUYER TOUR ===== */
+  .t1{background:var(--sand);}
+  .s1-head{padding:8px 26px 0;}
+  .s1-title{font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-.015em; margin-top:6px;}
+  .agent-pill{display:inline-flex; align-items:center; gap:9px; margin-top:14px; background:var(--paper); border:1px solid var(--line-sand); border-radius:100px; padding:6px 14px 6px 6px; font-size:13.5px; font-weight:500;}
+  .agent-pill .av{width:26px; height:26px;}
+  .agent-pill .cv{color:var(--ink-40); font-size:12px;}
+  .s1-progress{display:flex; align-items:center; gap:12px; margin-top:18px;}
+  .bar{flex:1; height:3px; background:var(--sand-2); border-radius:2px; overflow:hidden;}
+  .bar i{display:block; height:100%; width:40%; background:var(--ink); border-radius:2px; transition:width .3s;}
+  .s1-progress .count{font-size:12.5px; color:var(--ink-60); white-space:nowrap;}
+  .s1-progress .count b{color:var(--ink); font-weight:600;}
+  .stops{margin-top:20px; padding:0 14px; overflow-y:auto; flex:1;}
+  .stop{background:var(--paper); border:1px solid var(--line-sand); border-radius:18px; padding:13px 14px; display:flex; align-items:center; gap:13px; margin-bottom:11px; position:relative;}
+  .stop.active{border-color:rgba(0,122,255,.5); box-shadow:0 0 0 1px rgba(0,122,255,.25);}
+  .stop .thumb{width:54px; height:54px; flex:0 0 54px; border-radius:12px; position:relative;}
+  .stop .idx{position:absolute; top:3px; left:3px; z-index:2; font-size:9px; color:#fff; background:rgba(0,0,0,.4); border-radius:5px; padding:1px 4px; font-weight:700; letter-spacing:.05em;}
+  .ti{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  .hi{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  .stop .info{flex:1; min-width:0;}
+  .stop .addr{font-size:15px; font-weight:600; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .stop .meta{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .stop .meta .price{color:var(--ink); font-weight:600;}
+  .stop .right{display:flex; flex-direction:column; align-items:flex-end; gap:8px;}
+  .score{font-size:15px; font-weight:600; background:var(--ink); color:#fff; border-radius:9px; padding:3px 9px;}
+  .score.empty{background:transparent; color:var(--accent); border:1px solid rgba(0,122,255,.35); font-weight:500; font-size:13px;}
+  .dirbtn{display:flex; align-items:center; gap:5px; color:var(--accent); font-size:12.5px; font-weight:500;}
+  .dirbtn svg{width:13px; height:13px;}
+  .stop .now{font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:2px;}
+  .t-foot{flex:0 0 auto; padding:12px 20px 20px;}
+  .recapcta{display:block; width:100%; text-align:center; background:var(--ink); color:#fff; font-size:15px; font-weight:600; padding:14px; border-radius:14px;}
+
+  /* ===== THE TAKE ===== */
+  .s2{background:var(--paper);}
+  .s2-top{display:flex; align-items:center; justify-content:space-between; padding:0 18px 10px;}
+  .s2-back{color:var(--accent); font-size:16px;}
+  .saved{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-40);}
+  .saved .dot{width:6px; height:6px; border-radius:50%; background:#34C759;}
+  .hero{height:200px; flex:0 0 200px; position:relative; display:flex; align-items:flex-end;}
+  .hero .grad{position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.05) 35%,rgba(0,0,0,.78) 100%);}
+  .hero .chip{position:absolute; top:14px; left:14px; background:var(--ink); color:#fff; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; padding:6px 10px; border-radius:7px; z-index:2;}
+  .hero .info{position:relative; z-index:2; padding:14px 18px; color:#fff; width:100%;}
+  .hero .price{font-size:24px; font-weight:700; letter-spacing:-.02em;}
+  .hero .addr{font-size:13px; opacity:.92; margin-top:1px;}
+  .hero .stats{display:flex; margin-top:10px;}
+  .hero .stat{padding-right:16px; margin-right:16px; border-right:1px solid rgba(255,255,255,.28); display:flex; align-items:baseline; gap:5px;}
+  .hero .stat:last-child{border-right:none;}
+  .hero .stat b{font-size:15px; font-weight:600;}
+  .hero .stat span{font-size:11px; opacity:.8;}
+  .s2-body{flex:1; overflow-y:auto; padding:0 0 26px;}
+  .sect{padding:18px 20px 4px;}
+  .sect-label{font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .serif-prompt{font-family:var(--serif); font-style:italic; font-size:19px; margin-top:3px;}
+  .overall{display:flex; gap:11px; padding:12px 20px 16px;}
+  .mark{flex:1; height:46px; border-radius:13px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; color:var(--ink-40); background:var(--paper); cursor:pointer;}
+  .mark.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .hr{height:1px; background:var(--line); margin:0 20px;}
+  .cats{padding:6px 20px 8px;}
+  .cat{display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--line);}
+  .cat:last-child{border-bottom:none;}
+  .cat .name{font-size:15px; font-weight:500;}
+  .dots{display:flex; gap:7px;}
+  .dots i{width:11px; height:11px; border-radius:50%; border:1.5px solid var(--ink-40); display:block; cursor:pointer;}
+  .dots i.on{background:var(--ink); border-color:var(--ink);}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:16px 20px;}
+  .toggle-row .lab{font-size:15px; font-weight:600;}
+  .toggle-row .sub{font-size:12px; color:var(--ink-40); margin-top:2px;}
+  .switch{width:48px; height:29px; border-radius:100px; background:var(--sand-2); position:relative; flex:0 0 48px; cursor:pointer; transition:background .2s;}
+  .switch i{position:absolute; top:2px; left:2px; width:25px; height:25px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:left .2s;}
+  .switch.on{background:var(--oxblood);}
+  .switch.on i{left:21px;}
+  .mini-label{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-40); font-weight:600; margin:14px 0 0 20px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; padding:10px 20px 4px;}
+  .chip2{font-size:13px; padding:7px 13px; border-radius:100px; border:1px solid var(--line); cursor:pointer;}
+  .chip2.pro{border-color:rgba(10,10,10,.18);}
+  .chip2.con{border-color:rgba(155,44,44,.32); color:var(--oxblood);}
+  .chip2.add{color:var(--accent); border-color:rgba(0,122,255,.3); border-style:dashed;}
+  .note{margin:10px 20px 0; border:1px solid var(--line); border-radius:14px; padding:13px 14px; font-size:14px; color:var(--ink-40); min-height:56px;}
+  .savebar{flex:0 0 auto; padding:12px 20px 20px; border-top:1px solid var(--line);}
+  .savebtn{display:block; width:100%; text-align:center; background:var(--ink); color:#fff; font-size:16px; font-weight:600; padding:15px; border-radius:14px;}
+
+  /* ===== RECAP ===== */
+  .rc-body{flex:1; overflow-y:auto; padding:0 0 30px;}
+  .rc-head{padding:6px 24px 0;}
+  .rc-title{font-family:var(--serif); font-size:32px; font-weight:400; letter-spacing:-.015em; margin-top:6px; line-height:1.05;}
+  .subhead{font-size:13.5px; color:var(--ink-60); margin-top:10px;}
+  .subhead b{color:var(--ink); font-weight:600;}
+  .insight{margin:18px 18px 6px; background:var(--sand); border:1px solid var(--line-sand); border-radius:18px; padding:17px 18px;}
+  .insight .lab{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); font-weight:700;}
+  .insight .quote{font-family:var(--serif); font-style:italic; font-size:19px; line-height:1.34; margin-top:8px;}
+  .rows{padding:0 20px;}
+  .rrow{display:flex; align-items:center; gap:14px; padding:15px 6px; border-bottom:1px solid var(--line);}
+  .rrow:last-child{border-bottom:none;}
+  .rank{font-family:var(--serif); font-size:20px; color:var(--ink-40); width:20px; text-align:center; flex:0 0 20px;}
+  .rrow.top .rank{color:var(--ink);}
+  .rinfo{flex:1; min-width:0;}
+  .raddr{font-size:15.5px; font-weight:600; letter-spacing:-.01em;}
+  .rtags{font-size:12.5px; margin-top:3px; display:flex; gap:6px; flex-wrap:wrap;}
+  .tg{border:1px solid rgba(10,10,10,.16); border-radius:100px; padding:2px 9px; font-size:11.5px; color:var(--ink-60);}
+  .tg.con{border-color:rgba(155,44,44,.3); color:var(--oxblood);}
+  .db{display:inline-flex; align-items:center; gap:5px; color:var(--oxblood); font-size:12px; font-weight:600; margin-top:4px;}
+  .db .d{width:6px; height:6px; border-radius:50%; background:var(--oxblood);}
+  .rsc{display:flex; flex-direction:column; align-items:flex-end; gap:3px;}
+  .rchip{font-size:17px; font-weight:600; background:var(--ink); color:#fff; border-radius:10px; padding:5px 11px; min-width:48px; text-align:center;}
+  .rchip.low{background:var(--paper); color:var(--oxblood); border:1px solid rgba(155,44,44,.35);}
+  .rchip.mid{background:var(--ink-2);}
+  .rsc .of{font-size:10px; color:var(--ink-40);}
+
+  /* ===== TOUR MAP ===== */
+  .tg-row{padding:6px 20px 10px; display:flex;}
+  .tg-row.top{padding:8px 18px 8px;}
+  .seg2{display:flex; background:var(--sand-2); border-radius:9px; padding:2px; margin:0 auto;}
+  .seg2 span{font-size:13px; font-weight:600; color:var(--ink-60); padding:5px 20px; border-radius:7px;}
+  .seg2 span.on{background:var(--paper); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  .map{position:relative; width:390px; height:430px; flex:0 0 430px; overflow:hidden; background:#EFEBE2;}
+  .map svg.base{position:absolute; inset:0;}
+  .legend{position:absolute; top:12px; left:12px; background:rgba(255,255,255,.92); border:1px solid var(--line-sand); border-radius:11px; padding:8px 11px; font-size:11px; display:flex; flex-direction:column; gap:6px; z-index:5;}
+  .legend .lrow{display:flex; align-items:center; gap:7px; color:var(--ink-60); font-weight:500;}
+  .legend .dotk{width:13px; height:13px; border-radius:50%; flex:0 0 13px;}
+  .legend .dotk.stop{background:var(--ink);}
+  .legend .dotk.place{background:#fff; border:1.5px solid var(--accent);}
+  .pin{position:absolute; transform:translate(-50%,-50%); z-index:6;}
+  .stoppin{width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; border:2.5px solid #fff; box-shadow:0 2px 7px rgba(0,0,0,.32);}
+  .stoppin.active{background:var(--accent); transform:scale(1.12); box-shadow:0 0 0 4px rgba(0,122,255,.22), 0 3px 8px rgba(0,0,0,.3);}
+  .placepin{position:absolute; transform:translate(-50%,-50%); z-index:6;}
+  .placeicon{width:34px; height:34px; border-radius:50%; background:#fff; border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .placeicon svg{width:17px; height:17px; color:var(--accent);}
+  .placelabel{position:absolute; top:38px; left:50%; transform:translateX(-50%); font-size:9px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--accent); background:#fff; border:1px solid rgba(0,122,255,.25); border-radius:100px; padding:2px 7px; white-space:nowrap;}
+  .sheet{flex:1; background:var(--paper); border-top:1px solid var(--line); margin-top:-18px; border-radius:20px 20px 0 0; box-shadow:0 -6px 20px -8px rgba(40,35,25,.18); position:relative; z-index:10; padding:0 0 14px; overflow-y:auto;}
+  .grab{width:38px; height:5px; border-radius:3px; background:var(--sand-2); margin:9px auto 4px;}
+  .sheet-row{display:flex; align-items:center; gap:13px; padding:8px 20px 4px;}
+  .sp-num{width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:0 0 28px;}
+  .sp-info{flex:1; min-width:0;}
+  .sp-addr{font-size:16px; font-weight:600; letter-spacing:-.01em;}
+  .sp-meta{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .sp-dir{display:flex; align-items:center; gap:5px; color:var(--accent); font-size:13px; font-weight:600;}
+  .sp-dir svg{width:14px; height:14px;}
+  .prox-lab{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-40); font-weight:700; padding:14px 20px 0;}
+  .prox{display:flex; flex-direction:column; padding:6px 20px 0;}
+  .prow{display:flex; align-items:center; gap:11px; padding:9px 0; border-bottom:1px solid var(--line);}
+  .prow:last-child{border-bottom:none;}
+  .picon{width:26px; height:26px; border-radius:7px; background:var(--sand); display:flex; align-items:center; justify-content:center; flex:0 0 26px;}
+  .picon svg{width:14px; height:14px; color:var(--accent);}
+  .pname{flex:1; font-size:14px; font-weight:500;}
+  .ptime{font-size:14px; font-weight:600;}
+  .ptime span{font-size:12px; color:var(--ink-60); font-weight:400;}
+
+  /* ===== ONBOARDING ===== */
+  .w{justify-content:space-between; padding:0 28px 40px; text-align:center; align-items:center;}
+  .w-top{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .wordmark{font-family:var(--serif); font-size:62px; font-weight:400; letter-spacing:-.02em; line-height:1;}
+  .wordmark-sub{font-family:var(--serif); font-style:italic; font-size:17px; color:var(--ink-60); margin-top:14px; max-width:240px; line-height:1.4;}
+  .invite-card{display:flex; align-items:center; gap:13px; background:var(--paper); border:1px solid var(--line-sand); border-radius:18px; padding:14px 16px; margin-top:40px; width:100%; text-align:left;}
+  .invite-card .av{width:46px; height:46px;}
+  .ic-name{font-size:16px; font-weight:600;}
+  .ic-role{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .badge{margin-left:auto; flex:0 0 auto; white-space:nowrap; text-align:center; font-size:10px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--accent); border:1px solid rgba(0,122,255,.35); border-radius:100px; padding:5px 11px;}
+  .w-bot{width:100%;}
+  .cta.accent{background:var(--accent);}
+  .subtle{display:block; text-align:center; color:var(--accent); font-size:14px; font-weight:500; margin-top:16px; cursor:pointer;}
+  .ob-body{flex:1; overflow-y:auto; padding:6px 0 0;}
+  .head{padding:6px 28px 0;}
+  .steps{display:flex; gap:6px; margin-bottom:18px;}
+  .steps i{height:3px; border-radius:2px; background:var(--sand-2); flex:1;}
+  .steps i.on{background:var(--ink);}
+  .title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.015em; margin-top:4px;}
+  .subt{font-size:14px; color:var(--ink-60); margin-top:8px; line-height:1.4;}
+  .fields{padding:24px 24px 0;}
+  .field{border:1px solid var(--line-sand); background:var(--paper); border-radius:13px; padding:11px 15px; margin-bottom:12px;}
+  .fl{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .fv{font-size:16px; margin-top:3px;}
+  .field.focus{border-color:var(--accent); box-shadow:0 0 0 1px rgba(0,122,255,.25);}
+  .foot{flex:0 0 auto; padding:14px 24px 26px;}
+  .fineprint{font-size:11.5px; color:var(--ink-40); text-align:center; margin-top:14px; line-height:1.45;}
+  .rd{justify-content:space-between; padding:0 28px 40px; align-items:center;}
+  .rd-top{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; width:100%;}
+  .seal{width:64px; height:64px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:22px;}
+  .rd-eyebrow{color:var(--accent);}
+  .rd-title{font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-.015em; margin-top:8px;}
+  .pairpill{display:inline-flex; align-items:center; gap:9px; margin-top:18px; background:var(--paper); border:1px solid var(--line-sand); border-radius:100px; padding:6px 15px 6px 6px; font-size:14px; font-weight:500;}
+  .pairpill .av{width:28px; height:28px;}
+  .tourcard{width:100%; background:var(--paper); border:1px solid var(--line-sand); border-radius:18px; padding:18px; margin-top:28px; text-align:left;}
+  .tc-lab{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:700;}
+  .tc-when{font-family:var(--serif); font-size:21px; margin-top:6px;}
+  .tc-meta{font-size:13px; color:var(--ink-60); margin-top:3px;}
+  .tc-peek{display:flex; gap:7px; margin-top:14px;}
+  .tc-peek i{width:46px; height:46px; border-radius:10px; display:block;}
+  .photo.d{background:radial-gradient(50px 40px at 40% 55%,rgba(255,200,130,.5),transparent 70%),linear-gradient(135deg,#aeb6a0,#5b6150);}
+  .more{width:46px; height:46px; border-radius:10px; background:var(--sand-2); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:var(--ink-60);}
+
+  /* toast */
+  .toast{position:absolute; left:50%; bottom:90px; transform:translateX(-50%) translateY(10px); background:var(--ink); color:#fff; font-size:13px; padding:11px 18px; border-radius:100px; opacity:0; transition:.25s; z-index:30; pointer-events:none; white-space:nowrap;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="rolechip" id="rolechip">Agent app</span>
+    <button class="restart" onclick="restart()">↺ Restart</button>
+  </div>
+  <div class="hint" id="hint">Tap “Marcus &amp; Lena” to build their tour.</div>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+    <div class="stage">
+
+      <!-- ROSTER -->
+      <div class="view active t1" id="roster">
+        <div class="r-head">
+          <div class="eyebrow">Dana Whitlock</div>
+          <div class="r-top"><div class="r-title">Buyers</div><div class="newbtn">+</div></div>
+          <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Search buyers</div>
+        </div>
+        <div class="group-lab">Active · 5</div>
+        <div class="list">
+          <div class="buyer clk" onclick="go('builder','Agent app')" style="border-color:rgba(0,122,255,.4)">
+            <div class="av c"></div>
+            <div class="info"><div class="name">Marcus &amp; Lena</div><div class="meta">12 homes seen · last tour Jun 9</div></div>
+            <span class="pill today">Tour today</span>
+          </div>
+          <div class="buyer clk" onclick="toast('Demo focuses on Marcus &amp; Lena')">
+            <div class="av b"></div>
+            <div class="info"><div class="name">The Okafors</div><div class="meta">6 homes seen · last tour Jun 2</div></div>
+            <span class="pill soon">Tour Fri</span>
+          </div>
+          <div class="buyer clk" onclick="toast('Demo focuses on Marcus &amp; Lena')">
+            <div class="av e"></div>
+            <div class="info"><div class="name">Priya Anand</div><div class="meta">8 homes seen · last tour May 28</div></div>
+            <span class="chev">›</span>
+          </div>
+          <div class="buyer clk" onclick="toast('Demo focuses on Marcus &amp; Lena')">
+            <div class="av d"></div>
+            <div class="info"><div class="name">Tom &amp; Rachel Beck</div><div class="meta">No tours yet</div></div>
+            <span class="pill new">New</span>
+          </div>
+          <div class="buyer clk" onclick="toast('Demo focuses on Marcus &amp; Lena')">
+            <div class="av"></div>
+            <div class="info"><div class="name">Jordan Reyes</div><div class="meta">21 homes seen · last tour May 24</div></div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17.5" cy="9" r="2.6"/><path d="M16 14.4c2.4.2 4.5 2 4.5 4.6"/></svg>Buyers</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>Schedule</div>
+          <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19.5c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6"/></svg>Profile</div>
+        </div>
+      </div>
+
+      <!-- TOUR BUILDER -->
+      <div class="view pap" id="builder">
+        <div class="nav"><span class="back clk" onclick="go('roster','Agent app')">‹ Buyers</span><span class="rt clk" onclick="go('roster','Agent app')">Cancel</span></div>
+        <div class="b-head">
+          <div class="eyebrow">New tour · Marcus &amp; Lena</div>
+          <div class="b-title">Build the route</div>
+          <div class="datepick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>Tuesday, June 9</div>
+        </div>
+        <div class="addrow clk" onclick="toast('Address autocomplete (manual entry)')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Enter an address</div>
+        <div class="b-body"><div class="stoplist">
+          <div class="bstop"><div class="num">1</div><div class="binfo"><div class="baddr">204 Linden Avenue</div><div class="bmeta">$1.85M · 4 bd · 3 ba · 10:00 AM</div></div><div class="handle"><span></span><span></span><span></span></div></div>
+          <div class="bstop"><div class="num">2</div><div class="binfo"><div class="baddr">77 Serrano Drive</div><div class="bmeta">$2.69M · 6 bd · 7 ba · 10:45 AM</div></div><div class="handle"><span></span><span></span><span></span></div></div>
+          <div class="bstop"><div class="num">3</div><div class="binfo"><div class="baddr">513 Mills Street</div><div class="bmeta">$2.87M · 5 bd · 4 ba · 11:30 AM</div></div><div class="handle"><span></span><span></span><span></span></div></div>
+          <div class="bstop"><div class="num">4</div><div class="binfo"><div class="baddr">9 Greenbrier Court</div><div class="bmeta">$2.1M · 4 bd · 3 ba · 1:00 PM</div></div><div class="handle"><span></span><span></span><span></span></div></div>
+          <div class="bstop"><div class="num">5</div><div class="binfo"><div class="baddr">1288 N Oceanview Drive</div><div class="bmeta">$2.65M · 5 bd · 5 ba · 1:45 PM</div></div><div class="handle"><span></span><span></span><span></span></div></div>
+        </div></div>
+        <div class="b-foot">
+          <span class="cta clk" onclick="go('welcome','Buyer app'); toast('Invite sent to Marcus &amp; Lena')">Start tour · 5 stops</span>
+          <span class="cta-sub clk" onclick="toast('Itinerary shared')">Share itinerary with Marcus &amp; Lena</span>
+        </div>
+      </div>
+
+      <!-- ONBOARDING: WELCOME -->
+      <div class="view w" id="welcome">
+        <div class="w-top">
+          <div class="wordmark">Take</div>
+          <div class="wordmark-sub">The home you’ll remember — and the ones you won’t.</div>
+          <div class="invite-card">
+            <span class="av c"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=70&fit=crop&crop=faces" onerror="this.remove()"></span>
+            <div style="flex:1; min-width:0"><div class="ic-name">Dana Whitlock</div><div class="ic-role">invited you to house-hunt together</div></div>
+            <span class="badge">Your agent</span>
+          </div>
+        </div>
+        <div class="w-bot">
+          <span class="cta clk" onclick="go('setup','Buyer app')">Get started</span>
+          <span class="subtle clk" onclick="toast('Log in')">I already have an account</span>
+        </div>
+      </div>
+
+      <!-- ONBOARDING: SETUP -->
+      <div class="view pap" id="setup">
+        <div class="nav"><span class="back clk" onclick="go('welcome','Buyer app')">‹ Back</span><span></span></div>
+        <div class="ob-body">
+          <div class="head">
+            <div class="steps"><i class="on"></i><i></i></div>
+            <div class="eyebrow">Step 1 of 2</div>
+            <div class="title">Create your login</div>
+            <div class="subt">So your takes are saved and synced with Dana.</div>
+          </div>
+          <div class="fields">
+            <div class="field"><div class="fl">Your name</div><div class="fv">Marcus Bennett</div></div>
+            <div class="field"><div class="fl">Email</div><div class="fv">marcus.bennett@gmail.com</div></div>
+            <div class="field focus"><div class="fl">Create a password</div><div class="fv">••••••••••</div></div>
+          </div>
+        </div>
+        <div class="foot">
+          <span class="cta clk" onclick="go('ready','Buyer app')">Continue</span>
+          <div class="fineprint">By continuing you agree to Take’s Terms &amp; Privacy Policy.</div>
+        </div>
+      </div>
+
+      <!-- ONBOARDING: READY -->
+      <div class="view rd" id="ready">
+        <div class="rd-top">
+          <div class="seal">✓</div>
+          <div class="eyebrow rd-eyebrow">You’re paired</div>
+          <div class="rd-title">You’re in, Marcus.</div>
+          <div class="pairpill"><span class="av c"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=70&fit=crop&crop=faces" onerror="this.remove()"></span>Buying with Dana</div>
+          <div class="tourcard">
+            <div class="tc-lab">Your first tour</div>
+            <div class="tc-when">Tuesday, June 9</div>
+            <div class="tc-meta">5 homes · starts 10:00 AM</div>
+            <div class="tc-peek"><i class="photo"></i><i class="photo b"></i><i class="photo c"></i><i class="photo d"></i><span class="more">+1</span></div>
+          </div>
+        </div>
+        <div style="width:100%"><span class="cta accent clk" onclick="go('tour','Buyer app')">See today’s tour →</span></div>
+      </div>
+
+      <!-- BUYER TOUR -->
+      <div class="view t1" id="tour">
+        <div class="s1-head">
+          <div class="eyebrow">Tuesday · June 9</div>
+          <div class="s1-title">Today's tour</div>
+          <div class="agent-pill"><span class="av c"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=70&fit=crop&crop=faces" onerror="this.remove()"></span>Buying with Dana<span class="cv">⌄</span></div>
+          <div class="s1-progress"><div class="bar"><i id="bar"></i></div><div class="count"><b id="pc">2</b> of 5 takes</div></div>
+        </div>
+        <div class="tg-row"><div class="seg2"><span class="on">List</span><span class="clk" onclick="go('tourmap','Buyer app')">Map</span></div></div>
+        <div class="stops" id="stops">
+          <div class="stop" data-done="1"><div class="thumb photo"><img class="ti" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=200&q=70" onerror="this.remove()"><span class="idx">01</span></div><div class="info"><div class="addr">204 Linden Avenue</div><div class="meta"><span class="price">$1.85M</span> · 4 bd · 3 ba</div></div><div class="right"><div class="score">4.6</div><div class="dirbtn">Done</div></div></div>
+          <div class="stop" data-done="1"><div class="thumb photo b"><img class="ti" src="https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=200&q=70" onerror="this.remove()"><span class="idx">02</span></div><div class="info"><div class="addr">77 Serrano Drive</div><div class="meta"><span class="price">$2.69M</span> · 6 bd · 7 ba</div></div><div class="right"><div class="score">3.6</div><div class="dirbtn">Done</div></div></div>
+          <div class="stop active" data-addr="513 Mills Street, Atherton CA" data-price="$2,870,000" data-bd="5" data-ba="4" data-sq="3,940" data-img="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=75">
+            <div class="thumb photo c"><img class="ti" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=70" onerror="this.remove()"><span class="idx">03</span></div>
+            <div class="info"><div class="now">Now</div><div class="addr">513 Mills Street</div><div class="meta"><span class="price">$2.87M</span> · 5 bd · 4 ba</div></div>
+            <div class="right"><div class="score empty clk" onclick="openTake(this)">Add take</div><div class="dirbtn clk" onclick="event.stopPropagation();toast('Opening in Apple Maps…')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div></div>
+          </div>
+          <div class="stop" data-addr="9 Greenbrier Court" data-price="$2,100,000" data-bd="4" data-ba="3" data-sq="3,100" data-img="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=800&q=75">
+            <div class="thumb photo b"><img class="ti" src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=200&q=70" onerror="this.remove()"><span class="idx">04</span></div>
+            <div class="info"><div class="addr">9 Greenbrier Court</div><div class="meta"><span class="price">$2.1M</span> · 4 bd · 3 ba</div></div>
+            <div class="right"><div class="score empty clk" onclick="openTake(this)">Add take</div><div class="dirbtn clk" onclick="event.stopPropagation();toast('Opening in Apple Maps…')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div></div>
+          </div>
+          <div class="stop" data-addr="1288 N Oceanview Drive" data-price="$2,650,000" data-bd="5" data-ba="5" data-sq="4,200" data-img="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=75">
+            <div class="thumb photo"><img class="ti" src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&q=70" onerror="this.remove()"><span class="idx">05</span></div>
+            <div class="info"><div class="addr">1288 N Oceanview Drive</div><div class="meta"><span class="price">$2.65M</span> · 5 bd · 5 ba</div></div>
+            <div class="right"><div class="score empty clk" onclick="openTake(this)">Add take</div><div class="dirbtn clk" onclick="event.stopPropagation();toast('Opening in Apple Maps…')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div></div>
+          </div>
+        </div>
+        <div class="t-foot"><span class="recapcta clk" onclick="go('recap','Agent app')">See tour recap →</span></div>
+      </div>
+
+      <!-- BUYER TOUR MAP -->
+      <div class="view" id="tourmap">
+        <div class="tg-row top"><div class="seg2"><span class="clk" onclick="go('tour','Buyer app')">List</span><span class="on">Map</span></div></div>
+        <div class="map">
+          <svg class="base" viewBox="0 0 390 430" preserveAspectRatio="xMidYMid slice">
+            <rect x="206" y="214" width="150" height="150" rx="14" fill="#D8DCC8"/>
+            <path d="M0 378 Q70 360 140 380 T300 388 L300 430 L0 430 Z" fill="#CBD8DC"/>
+            <g fill="#E7E2D6"><rect x="22" y="50" width="90" height="64" rx="4"/><rect x="130" y="34" width="80" height="56" rx="4"/><rect x="40" y="232" width="100" height="84" rx="4"/><rect x="250" y="52" width="110" height="110" rx="4"/></g>
+            <g stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"><path d="M0 138 H390"/><path d="M0 214 H390"/><path d="M120 0 V430"/><path d="M235 0 V430"/></g>
+            <g stroke="#F4F0E7" stroke-width="4" stroke-linecap="round"><path d="M0 92 H390"/><path d="M0 296 H390"/><path d="M60 0 V430"/><path d="M300 0 V430"/><path d="M0 0 L190 190"/><path d="M390 84 L210 260"/></g>
+            <polyline points="70,112 185,88 258,172 175,278 95,344" fill="none" stroke="#0A0A0A" stroke-width="2.6" stroke-dasharray="1 8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+          </svg>
+          <div class="legend">
+            <div class="lrow"><span class="dotk stop"></span>Tour stops</div>
+            <div class="lrow"><span class="dotk place"></span>Their places</div>
+          </div>
+          <div class="placepin" style="left:308px; top:94px;"><div class="placeicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div><span class="placelabel">Work</span></div>
+          <div class="placepin" style="left:122px; top:196px;"><div class="placeicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11v5c0 1 2.2 2.5 5 2.5s5-1.5 5-2.5v-5"/></svg></div><span class="placelabel">School</span></div>
+          <div class="placepin" style="left:300px; top:312px;"><div class="placeicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6M9 6h6M5 21V11l7-4 7 4v10M9 21v-5h6v5"/></svg></div><span class="placelabel">Church</span></div>
+          <div class="pin" style="left:70px; top:112px;"><div class="stoppin">1</div></div>
+          <div class="pin" style="left:185px; top:88px;"><div class="stoppin">2</div></div>
+          <div class="pin" style="left:258px; top:172px;"><div class="stoppin active">3</div></div>
+          <div class="pin" style="left:175px; top:278px;"><div class="stoppin">4</div></div>
+          <div class="pin" style="left:95px; top:344px;"><div class="stoppin">5</div></div>
+        </div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <div class="sheet-row">
+            <div class="sp-num">3</div>
+            <div class="sp-info"><div class="sp-addr">513 Mills Street</div><div class="sp-meta">$2.87M · 5 bd · 4 ba · 11:30 AM</div></div>
+            <div class="sp-dir clk" onclick="toast('Opening in Apple Maps…')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div>
+          </div>
+          <div class="prox-lab">How it fits their life</div>
+          <div class="prox">
+            <div class="prow"><span class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span><span class="pname">Lena’s office</span><span class="ptime">11 min <span>drive</span></span></div>
+            <div class="prow"><span class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11v5c0 1 2.2 2.5 5 2.5s5-1.5 5-2.5v-5"/></svg></span><span class="pname">Westfield Elementary</span><span class="ptime">6 min <span>drive</span></span></div>
+            <div class="prow"><span class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6M9 6h6M5 21V11l7-4 7 4v10M9 21v-5h6v5"/></svg></span><span class="pname">Grace Chapel</span><span class="ptime">5 min <span>drive</span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE TAKE -->
+      <div class="view s2" id="take">
+        <div class="s2-top"><span class="s2-back clk" onclick="go('tour','Buyer app')">‹ Tour</span><span class="saved"><span class="dot"></span>Saved</span></div>
+        <div class="hero photo c">
+          <img class="hi" id="takehi" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=75" onerror="this.remove()">
+          <div class="grad"></div>
+          <div class="chip" id="tk-chip">Stop 3 of 5</div>
+          <div class="info"><div class="price" id="tk-price">$2,870,000</div><div class="addr" id="tk-addr">513 Mills Street, Atherton CA</div>
+            <div class="stats"><div class="stat"><b id="tk-bd">5</b><span>Beds</span></div><div class="stat"><b id="tk-ba">4</b><span>Baths</span></div><div class="stat"><b id="tk-sq">3,940</b><span>Sq Ft</span></div></div>
+          </div>
+        </div>
+        <div class="s2-body">
+          <div class="sect"><div class="sect-label">Overall</div><div class="serif-prompt">What's your take?</div></div>
+          <div class="overall" id="overall">
+            <div class="mark" onclick="setMark(this,1)">1</div><div class="mark" onclick="setMark(this,2)">2</div><div class="mark" onclick="setMark(this,3)">3</div><div class="mark" onclick="setMark(this,4)">4</div><div class="mark" onclick="setMark(this,5)">5</div>
+          </div>
+          <div class="hr"></div>
+          <div class="cats" id="cats">
+            <div class="cat"><span class="name">Layout / flow</span><span class="dots">{D}</span></div>
+            <div class="cat"><span class="name">Kitchen</span><span class="dots">{D}</span></div>
+            <div class="cat"><span class="name">Primary suite</span><span class="dots">{D}</span></div>
+            <div class="cat"><span class="name">Condition</span><span class="dots">{D}</span></div>
+            <div class="cat"><span class="name">Outdoor space</span><span class="dots">{D}</span></div>
+            <div class="cat"><span class="name">Location</span><span class="dots">{D}</span></div>
+            <div class="cat"><span class="name">Value for price</span><span class="dots">{D}</span></div>
+          </div>
+          <div class="hr"></div>
+          <div class="toggle-row"><div><div class="lab">Deal-breaker</div><div class="sub">A hard no, louder than a low score</div></div><div class="switch" id="db" onclick="this.classList.toggle('on')"><i></i></div></div>
+          <div class="hr"></div>
+          <div class="mini-label">Pros</div>
+          <div class="chips"><span class="chip2 pro clk" onclick="this.classList.toggle('add')">Great light</span><span class="chip2 pro clk" onclick="this.classList.toggle('add')">Big yard</span><span class="chip2 add clk" onclick="toast('Add a pro')">＋ Add</span></div>
+          <div class="mini-label">Cons</div>
+          <div class="chips"><span class="chip2 con clk" onclick="this.classList.toggle('add')">Busy street</span><span class="chip2 add clk" onclick="toast('Add a con')">＋ Add</span></div>
+          <div class="mini-label">Note</div>
+          <div class="note">Anything else worth remembering?</div>
+        </div>
+        <div class="savebar"><span class="savebtn clk" onclick="saveTake()">Save take</span></div>
+      </div>
+
+      <!-- RECAP -->
+      <div class="view pap" id="recap">
+        <div class="nav"><span class="back clk" onclick="go('roster','Agent app')">‹ Marcus &amp; Lena</span><span class="rt" style="color:var(--accent)" onclick="toast('Recap shared')">Share recap</span></div>
+        <div class="rc-body">
+          <div class="rc-head">
+            <div class="eyebrow">Tour recap · Tue, Jun 9</div>
+            <div class="rc-title">Five homes,<br>one clear favorite.</div>
+            <div class="subhead"><b>5 of 5</b> takes in · ranked by overall</div>
+          </div>
+          <div class="insight"><div class="lab">The pattern</div><div class="quote">Both homes they loved had a big yard and an updated kitchen. The two they cooled on were short on outdoor space.</div></div>
+          <div class="rows">
+            <div class="rrow top"><div class="rank">1</div><div class="rinfo"><div class="raddr">204 Linden Avenue</div><div class="rtags"><span class="tg">Great light</span><span class="tg">Big yard</span></div></div><div class="rsc"><div class="rchip">4.6</div><div class="of">overall</div></div></div>
+            <div class="rrow"><div class="rank">2</div><div class="rinfo"><div class="raddr">1288 N Oceanview Drive</div><div class="rtags"><span class="tg">Updated kitchen</span><span class="tg">Views</span></div></div><div class="rsc"><div class="rchip">4.1</div><div class="of">overall</div></div></div>
+            <div class="rrow"><div class="rank">3</div><div class="rinfo"><div class="raddr">77 Serrano Drive</div><div class="rtags"><span class="tg">Big rooms</span><span class="tg con">Small yard</span></div></div><div class="rsc"><div class="rchip mid">3.6</div><div class="of">overall</div></div></div>
+            <div class="rrow"><div class="rank">4</div><div class="rinfo"><div class="raddr">9 Greenbrier Court</div><div class="rtags"><span class="tg con">No outdoor space</span></div></div><div class="rsc"><div class="rchip mid">3.0</div><div class="of">overall</div></div></div>
+            <div class="rrow"><div class="rank">5</div><div class="rinfo"><div class="raddr">513 Mills Street</div><div class="db"><span class="d"></span>Deal-breaker · Busy street</div></div><div class="rsc"><div class="rchip low">2.4</div><div class="of">overall</div></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+<script>
+  // fill category dot rows (3 filled by default)
+  function dotRow(){let s='';for(let i=0;i<5;i++)s+='<i class="'+(i<3?'on':'')+'" onclick="setDots(this)"></i>';return s;}
+  document.querySelectorAll('#cats .dots').forEach(d=>d.innerHTML=dotRow());
+
+  let curStop=null;
+  function setRole(r){const c=document.getElementById('rolechip');c.textContent=r;c.classList.toggle('buyer',r==='Buyer app');
+    const hints={roster:'Tap “Marcus &amp; Lena” to build their tour.',builder:'Reorder stops, then Start tour to hand off to the buyer.',tour:'Now the buyer’s phone. Tap a home’s “Add take”. Try “Directions” too.',take:'Rate the home — tap the 1–5, the category dots, the deal-breaker.',recap:'The payoff: the day ranked, with the pattern surfaced.'};}
+  function go(id,role){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelector('.stage').scrollTop=0;if(role)setRole(role);
+    const hints={roster:'Tap “Marcus &amp; Lena” to build their tour.',builder:'Reorder stops, then Start tour to send the invite to the buyer.',welcome:'Now it’s the buyer’s phone — they just got Dana’s invite. Tap Get started.',setup:'A quick sign-up to pair with Dana. Tap Continue.',ready:'Paired. Tap “See today’s tour” to step into the buyer app.',tour:'The buyer’s tour. Tap a home’s “Add take”, try “Directions”, or switch to Map.',tourmap:'The day on a map — stops in order (ink) plus their pinned places (blue). Toggle back to List.',take:'Rate the home: tap the 1–5, the category dots, toggle the deal-breaker, then Save.',recap:'The payoff — the whole day ranked, with the pattern surfaced automatically.'};
+    document.getElementById('hint').innerHTML=hints[id]||'';}
+  function openTake(el){curStop=el.closest('.stop');const d=curStop.dataset;
+    document.getElementById('tk-addr').textContent=d.addr;document.getElementById('tk-price').textContent=d.price;
+    document.getElementById('tk-bd').textContent=d.bd;document.getElementById('tk-ba').textContent=d.ba;document.getElementById('tk-sq').textContent=d.sq;
+    const idx=[...document.querySelectorAll('#stops .stop')].indexOf(curStop)+1;document.getElementById('tk-chip').textContent='Stop '+idx+' of 5';
+    const hi=document.getElementById('takehi'); if(hi&&d.img){hi.src=d.img;}
+    // reset controls
+    document.querySelectorAll('#overall .mark').forEach(m=>m.classList.remove('on'));
+    document.getElementById('db').classList.remove('on');
+    go('take','Buyer app');}
+  function setMark(el,v){document.querySelectorAll('#overall .mark').forEach(m=>m.classList.remove('on'));el.classList.add('on');el.dataset.v=v;window._ov=v;}
+  function setDots(el){const dots=[...el.parentNode.children];const i=dots.indexOf(el);dots.forEach((d,j)=>d.classList.toggle('on',j<=i));}
+  function saveTake(){if(curStop){const ov=window._ov||4;const r=curStop.querySelector('.right');r.innerHTML='<div class="score">'+Number(ov).toFixed(1)+'</div><div class="dirbtn">Done</div>';curStop.classList.remove('active');const now=curStop.querySelector('.now');if(now)now.remove();
+    const pc=document.getElementById('pc');let n=Math.min(5,parseInt(pc.textContent)+1);pc.textContent=n;document.getElementById('bar').style.width=(n/5*100)+'%';window._ov=null;}
+    toast('Take saved');go('tour','Buyer app');}
+  let tT;function toast(msg){const t=document.getElementById('toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),1500);}
+  const _stopsHTML=document.getElementById('stops').innerHTML;
+  function restart(){document.getElementById('stops').innerHTML=_stopsHTML;document.getElementById('pc').textContent='2';document.getElementById('bar').style.width='40%';window._ov=null;go('roster','Agent app');}
+  setRole('Agent app');document.getElementById('bar').style.width='40%';
+</script>
+</body>
+</html>

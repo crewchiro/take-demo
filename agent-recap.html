@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Agent Recap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-2:#1A1A1A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line:#ECECEC; --line-sand:#E3DED4;
+    --accent:#007AFF; --accent-press:#0062CC;
+    --oxblood:#9B2C2C;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--sans); color:var(--ink); background:#E5DFD3; padding:56px 40px 72px; display:flex; flex-direction:column; align-items:center;}
+  .page-title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.01em; margin-bottom:4px; color:#2a271f;}
+  .page-sub{font-family:var(--serif); font-style:italic; font-size:15px; color:#8f8a7e; margin-bottom:36px;}
+  .frame-wrap{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .caption{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8f8a7e;}
+
+  .phone{width:390px; height:844px; background:var(--paper); border-radius:46px; box-shadow:0 2px 2px rgba(0,0,0,.04), 0 30px 60px -20px rgba(40,35,25,.45); position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.06); display:flex; flex-direction:column;}
+  .statusbar{height:54px; flex:0 0 54px; display:flex; align-items:center; justify-content:space-between; padding:0 30px 0 34px; font-size:15px; font-weight:600; z-index:5;}
+  .statusbar .icons{display:flex; gap:6px; font-size:13px;}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--ink); border-radius:18px; z-index:6;}
+  .screen{flex:1; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:0 18px 8px;}
+  .nav .back{color:var(--accent); font-size:16px;}
+  .nav .share{color:var(--accent); font-size:14px; font-weight:500;}
+
+  .body{flex:1; overflow-y:auto; padding:0 0 30px;}
+  .head{padding:6px 24px 0;}
+  .eyebrow{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .title{font-family:var(--serif); font-size:33px; font-weight:400; letter-spacing:-.015em; margin-top:6px; line-height:1.05;}
+  .subhead{font-size:13.5px; color:var(--ink-60); margin-top:10px;}
+  .subhead b{color:var(--ink); font-weight:600;}
+
+  /* the pattern / insight moment */
+  .insight{margin:20px 18px 6px; background:var(--sand); border:1px solid var(--line-sand); border-radius:18px; padding:18px 18px 19px;}
+  .insight .lab{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); font-weight:700;}
+  .insight .quote{font-family:var(--serif); font-style:italic; font-size:19.5px; line-height:1.34; color:var(--ink); margin-top:9px; letter-spacing:-.005em;}
+
+  .section-lab{font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:600; padding:22px 24px 4px;}
+
+  .rows{padding:0 18px;}
+  .row{display:flex; align-items:center; gap:14px; padding:15px 6px; border-bottom:1px solid var(--line);}
+  .row:last-child{border-bottom:none;}
+  .rank{font-family:var(--serif); font-size:20px; color:var(--ink-40); width:18px; text-align:center; flex:0 0 18px;}
+  .rthumb{width:46px; height:46px; border-radius:10px; overflow:hidden; position:relative; flex:0 0 46px; background:linear-gradient(165deg,#b9a98c,#5c5346);}
+  .ti{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .row.top .rank{color:var(--ink);}
+  .rinfo{flex:1; min-width:0;}
+  .raddr{font-size:15.5px; font-weight:600; letter-spacing:-.01em;}
+  .rtags{font-size:12.5px; color:var(--ink-60); margin-top:3px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .tag{border:1px solid rgba(10,10,10,.16); border-radius:100px; padding:2px 9px; font-size:11.5px; color:var(--ink-60);}
+  .tag.con{border-color:rgba(155,44,44,.3); color:var(--oxblood);}
+  .db{display:inline-flex; align-items:center; gap:5px; color:var(--oxblood); font-size:12px; font-weight:600; margin-top:4px;}
+  .db .dot{width:6px; height:6px; border-radius:50%; background:var(--oxblood); display:inline-block;}
+  .rscore{flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-end; gap:3px;}
+  .chip{font-size:17px; font-weight:600; background:var(--ink); color:#fff; border-radius:10px; padding:5px 11px; letter-spacing:.01em; min-width:48px; text-align:center;}
+  .chip.low{background:var(--paper); color:var(--oxblood); border:1px solid rgba(155,44,44,.35);}
+  .chip.mid{background:var(--ink-2);}
+  .rscore .of{font-size:10px; color:var(--ink-40); letter-spacing:.04em;}
+
+  .footnote{font-family:var(--serif); font-style:italic; font-size:14px; color:var(--ink-60); padding:20px 26px 6px; line-height:1.4;}
+</style>
+</head>
+<body>
+  <div class="page-title">Take</div>
+  <div class="page-sub">Agent app — the end-of-day tour recap (the payoff screen).</div>
+
+  <div class="frame-wrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+      <div class="screen">
+        <div class="nav">
+          <span class="back">‹ Marcus &amp; Lena</span>
+          <span class="share">Share recap</span>
+        </div>
+        <div class="body">
+          <div class="head">
+            <div class="eyebrow">Tour recap · Tue, Jun 9</div>
+            <div class="title">Five homes,<br>one clear favorite.</div>
+            <div class="subhead"><b>5 of 5</b> takes in · ranked by overall</div>
+          </div>
+
+          <div class="insight">
+            <div class="lab">The pattern</div>
+            <div class="quote">Both homes they loved had a big yard and an updated kitchen. The two they cooled on were short on outdoor space.</div>
+          </div>
+
+          <div class="section-lab">Ranked</div>
+          <div class="rows">
+
+            <div class="row top">
+              <div class="rank">1</div>
+              <div class="rthumb"><img class="ti" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=120&q=70" onerror="this.remove()"></div>
+              <div class="rinfo">
+                <div class="raddr">204 Linden Avenue</div>
+                <div class="rtags"><span class="tag">Great light</span><span class="tag">Big yard</span></div>
+              </div>
+              <div class="rscore"><div class="chip">4.6</div><div class="of">overall</div></div>
+            </div>
+
+            <div class="row">
+              <div class="rank">2</div>
+              <div class="rthumb"><img class="ti" src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=120&q=70" onerror="this.remove()"></div>
+              <div class="rinfo">
+                <div class="raddr">1288 N Oceanview Drive</div>
+                <div class="rtags"><span class="tag">Updated kitchen</span><span class="tag">Views</span></div>
+              </div>
+              <div class="rscore"><div class="chip">4.1</div><div class="of">overall</div></div>
+            </div>
+
+            <div class="row">
+              <div class="rank">3</div>
+              <div class="rthumb"><img class="ti" src="https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=120&q=70" onerror="this.remove()"></div>
+              <div class="rinfo">
+                <div class="raddr">77 Serrano Drive</div>
+                <div class="rtags"><span class="tag">Big rooms</span><span class="tag con">Small yard</span></div>
+              </div>
+              <div class="rscore"><div class="chip mid">3.6</div><div class="of">overall</div></div>
+            </div>
+
+            <div class="row">
+              <div class="rank">4</div>
+              <div class="rthumb"><img class="ti" src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=120&q=70" onerror="this.remove()"></div>
+              <div class="rinfo">
+                <div class="raddr">9 Greenbrier Court</div>
+                <div class="rtags"><span class="tag con">No outdoor space</span></div>
+              </div>
+              <div class="rscore"><div class="chip mid">3.0</div><div class="of">overall</div></div>
+            </div>
+
+            <div class="row">
+              <div class="rank">5</div>
+              <div class="rthumb"><img class="ti" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=120&q=70" onerror="this.remove()"></div>
+              <div class="rinfo">
+                <div class="raddr">513 Mills Street</div>
+                <div class="db"><span class="dot"></span>Deal-breaker · Busy street</div>
+              </div>
+              <div class="rscore"><div class="chip low">2.4</div><div class="of">overall</div></div>
+            </div>
+
+          </div>
+
+          <div class="footnote">Marcus flagged the busy street at 513 Mills before you'd left the driveway. Worth leading with the quiet cul-de-sacs next time.</div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Agent — tour recap</div>
+  </div>
+</body>
+</html>

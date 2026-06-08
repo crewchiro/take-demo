@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Agent Front Door</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-2:#1A1A1A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line:#ECECEC; --line-sand:#E3DED4;
+    --accent:#007AFF; --accent-press:#0062CC;
+    --oxblood:#9B2C2C;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--sans); color:var(--ink); background:#E5DFD3; padding:56px 40px 72px; display:flex; flex-direction:column; align-items:center;}
+  .page-title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.01em; margin-bottom:4px; color:#2a271f;}
+  .page-sub{font-family:var(--serif); font-style:italic; font-size:15px; color:#8f8a7e; margin-bottom:36px;}
+  .stage{display:flex; gap:48px; flex-wrap:wrap; justify-content:center; align-items:flex-start;}
+  .frame-wrap{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .caption{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8f8a7e;}
+
+  .phone{width:390px; height:844px; background:var(--sand); border-radius:46px; box-shadow:0 2px 2px rgba(0,0,0,.04), 0 30px 60px -20px rgba(40,35,25,.45); position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.06); display:flex; flex-direction:column;}
+  .statusbar{height:54px; flex:0 0 54px; display:flex; align-items:center; justify-content:space-between; padding:0 30px 0 34px; font-size:15px; font-weight:600; z-index:5;}
+  .statusbar .icons{display:flex; gap:6px; font-size:13px;}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--ink); border-radius:18px; z-index:6;}
+  .screen{flex:1; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+
+  .eyebrow{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+
+  /* photographic placeholder for avatars */
+  .av{border-radius:50%; background:linear-gradient(135deg,#c9bda8,#8a7d63); flex:0 0 auto;}
+  .av.b{background:linear-gradient(135deg,#a9b3bd,#5f6b78);}
+  .av.c{background:linear-gradient(135deg,#cdbba9,#9a7c63);}
+  .av.d{background:linear-gradient(135deg,#bcae93,#7d7458);}
+  .av.e{background:linear-gradient(135deg,#b7b1c2,#6f6982);}
+
+  /* ============ ROSTER ============ */
+  .r-head{padding:6px 24px 0;}
+  .r-top{display:flex; align-items:flex-start; justify-content:space-between;}
+  .r-title{font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-.015em; margin-top:6px;}
+  .newbtn{margin-top:14px; width:34px; height:34px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:300; line-height:1;}
+  .search{display:flex; align-items:center; gap:9px; margin-top:18px; background:var(--paper); border:1px solid var(--line-sand); border-radius:12px; padding:10px 14px; color:var(--ink-40); font-size:14.5px;}
+  .search svg{width:15px; height:15px; color:var(--ink-40);}
+
+  .group-lab{font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:600; padding:22px 26px 2px;}
+  .list{flex:1; overflow-y:auto; padding:6px 14px 0;}
+  .buyer{display:flex; align-items:center; gap:13px; background:var(--paper); border:1px solid var(--line-sand); border-radius:18px; padding:13px 14px; margin-bottom:11px;}
+  .buyer .av{width:44px; height:44px;}
+  .buyer .info{flex:1; min-width:0;}
+  .buyer .name{font-size:16px; font-weight:600; letter-spacing:-.01em;}
+  .buyer .meta{font-size:12.5px; color:var(--ink-60); margin-top:3px;}
+  .buyer .right{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+  .pill{font-size:11.5px; font-weight:600; letter-spacing:.01em; padding:5px 10px; border-radius:100px;}
+  .pill.today{background:var(--accent); color:#fff;}
+  .pill.soon{background:transparent; color:var(--accent); border:1px solid rgba(0,122,255,.4);}
+  .pill.new{background:var(--sand-2); color:var(--ink-60);}
+  .chev{color:var(--ink-40); font-size:18px;}
+
+  /* ============ TAB BAR ============ */
+  .tabbar{flex:0 0 64px; background:var(--paper); border-top:1px solid var(--line-sand); display:flex; align-items:flex-start; padding-top:9px;}
+  .tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--ink-40); font-size:10px; letter-spacing:.02em;}
+  .tab.on{color:var(--ink);}
+  .tab svg{width:23px; height:23px;}
+
+  /* ============ TOUR BUILDER ============ */
+  .b2{background:var(--paper);}
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:0 18px 6px;}
+  .nav .back{color:var(--accent); font-size:16px;}
+  .nav .right{color:var(--ink-40); font-size:14px;}
+  .b-head{padding:6px 24px 0;}
+  .b-title{font-family:var(--serif); font-size:32px; font-weight:400; letter-spacing:-.015em; margin-top:6px;}
+  .datepick{display:flex; align-items:center; gap:7px; margin-top:12px; color:var(--accent); font-size:14.5px; font-weight:500;}
+  .datepick svg{width:15px; height:15px;}
+
+  .addrow{display:flex; align-items:center; gap:10px; margin:20px 20px 6px; background:var(--sand); border:1px solid var(--line-sand); border-radius:13px; padding:13px 14px; color:var(--ink-40); font-size:14.5px;}
+  .addrow svg{width:16px; height:16px; color:var(--accent);}
+
+  .b-body{flex:1; overflow-y:auto; padding:6px 0 0;}
+  .stoplist{padding:0 20px;}
+  .bstop{display:flex; align-items:center; gap:13px; padding:14px 0; border-bottom:1px solid var(--line);}
+  .bstop .num{font-family:var(--serif); font-size:18px; color:var(--ink-40); width:18px; text-align:center; flex:0 0 18px;}
+  .bthumb{width:42px; height:42px; border-radius:9px; overflow:hidden; position:relative; flex:0 0 42px; background:linear-gradient(165deg,#b9a98c,#5c5346);}
+  .ti{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .bstop .binfo{flex:1; min-width:0;}
+  .bstop .baddr{font-size:15px; font-weight:600; letter-spacing:-.01em;}
+  .bstop .bmeta{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .bstop .handle{color:var(--ink-40); display:flex; flex-direction:column; gap:3px; flex:0 0 auto; padding-left:6px;}
+  .bstop .handle span{display:block; width:17px; height:1.5px; background:var(--ink-40); border-radius:2px;}
+
+  .b-foot{flex:0 0 auto; padding:14px 20px 24px; border-top:1px solid var(--line); background:var(--paper);}
+  .cta{display:block; width:100%; text-align:center; background:var(--ink); color:#fff; font-size:16px; font-weight:600; padding:15px; border-radius:14px; letter-spacing:.01em;}
+  .cta-sub{display:block; text-align:center; color:var(--accent); font-size:14px; font-weight:500; margin-top:13px;}
+</style>
+</head>
+<body>
+  <div class="page-title">Take</div>
+  <div class="page-sub">Agent app — the front door: buyer roster &amp; tour builder.</div>
+
+  <div class="stage">
+    <!-- ============ ROSTER ============ -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+        <div class="screen">
+          <div class="r-head">
+            <div class="eyebrow">Dana Whitlock</div>
+            <div class="r-top">
+              <div class="r-title">Buyers</div>
+              <div class="newbtn">+</div>
+            </div>
+            <div class="search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+              Search buyers
+            </div>
+          </div>
+          <div class="group-lab">Active · 5</div>
+          <div class="list">
+
+            <div class="buyer">
+              <div class="av c"></div>
+              <div class="info">
+                <div class="name">Marcus &amp; Lena</div>
+                <div class="meta">12 homes seen · last tour Jun 9</div>
+              </div>
+              <div class="right"><span class="pill today">Tour today</span></div>
+            </div>
+
+            <div class="buyer">
+              <div class="av b"></div>
+              <div class="info">
+                <div class="name">The Okafors</div>
+                <div class="meta">6 homes seen · last tour Jun 2</div>
+              </div>
+              <div class="right"><span class="pill soon">Tour Fri</span></div>
+            </div>
+
+            <div class="buyer">
+              <div class="av e"></div>
+              <div class="info">
+                <div class="name">Priya Anand</div>
+                <div class="meta">8 homes seen · last tour May 28</div>
+              </div>
+              <div class="right"><span class="chev">›</span></div>
+            </div>
+
+            <div class="buyer">
+              <div class="av d"></div>
+              <div class="info">
+                <div class="name">Tom &amp; Rachel Beck</div>
+                <div class="meta">No tours yet</div>
+              </div>
+              <div class="right"><span class="pill new">New</span></div>
+            </div>
+
+            <div class="buyer">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Jordan Reyes</div>
+                <div class="meta">21 homes seen · last tour May 24</div>
+              </div>
+              <div class="right"><span class="chev">›</span></div>
+            </div>
+
+          </div>
+          <div class="tabbar">
+            <div class="tab on">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17.5" cy="9" r="2.6"/><path d="M16 14.4c2.4.2 4.5 2 4.5 4.6"/></svg>
+              Buyers
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>
+              Schedule
+            </div>
+            <div class="tab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19.5c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6"/></svg>
+              Profile
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption">Agent — buyer roster</div>
+    </div>
+
+    <!-- ============ TOUR BUILDER ============ -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+        <div class="screen b2">
+          <div class="nav">
+            <span class="back">‹ Marcus &amp; Lena</span>
+            <span class="right">Cancel</span>
+          </div>
+          <div class="b-head">
+            <div class="eyebrow">New tour</div>
+            <div class="b-title">Build the route</div>
+            <div class="datepick">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>
+              Tuesday, June 9
+            </div>
+          </div>
+
+          <div class="addrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            Enter an address
+          </div>
+
+          <div class="b-body">
+            <div class="stoplist">
+              <div class="bstop">
+                <div class="num">1</div>
+                <div class="bthumb"><img class="ti" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=110&q=70" onerror="this.remove()"></div>
+                <div class="binfo"><div class="baddr">204 Linden Avenue</div><div class="bmeta">$1.85M · 4 bd · 3 ba · 10:00 AM</div></div>
+                <div class="handle"><span></span><span></span><span></span></div>
+              </div>
+              <div class="bstop">
+                <div class="num">2</div>
+                <div class="bthumb"><img class="ti" src="https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=110&q=70" onerror="this.remove()"></div>
+                <div class="binfo"><div class="baddr">77 Serrano Drive</div><div class="bmeta">$2.69M · 6 bd · 7 ba · 10:45 AM</div></div>
+                <div class="handle"><span></span><span></span><span></span></div>
+              </div>
+              <div class="bstop">
+                <div class="num">3</div>
+                <div class="bthumb"><img class="ti" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=110&q=70" onerror="this.remove()"></div>
+                <div class="binfo"><div class="baddr">513 Mills Street</div><div class="bmeta">$2.87M · 5 bd · 4 ba · 11:30 AM</div></div>
+                <div class="handle"><span></span><span></span><span></span></div>
+              </div>
+              <div class="bstop">
+                <div class="num">4</div>
+                <div class="bthumb"><img class="ti" src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=110&q=70" onerror="this.remove()"></div>
+                <div class="binfo"><div class="baddr">9 Greenbrier Court</div><div class="bmeta">$2.1M · 4 bd · 3 ba · 1:00 PM</div></div>
+                <div class="handle"><span></span><span></span><span></span></div>
+              </div>
+              <div class="bstop">
+                <div class="num">5</div>
+                <div class="bthumb"><img class="ti" src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=110&q=70" onerror="this.remove()"></div>
+                <div class="binfo"><div class="baddr">1288 N Oceanview Drive</div><div class="bmeta">$2.65M · 5 bd · 5 ba · 1:45 PM</div></div>
+                <div class="handle"><span></span><span></span><span></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="b-foot">
+            <span class="cta">Start tour · 5 stops</span>
+            <span class="cta-sub">Share itinerary with Marcus &amp; Lena</span>
+          </div>
+        </div>
+      </div>
+      <div class="caption">Agent — tour builder</div>
+    </div>
+  </div>
+</body>
+</html>

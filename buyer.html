@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Buyer Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-2:#1A1A1A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line:#ECECEC; --line-sand:#E3DED4;
+    --accent:#007AFF; --accent-press:#0062CC;
+    --oxblood:#9B2C2C;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    background:#E5DFD3;
+    padding:56px 40px 72px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .page-eyebrow{font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:#8a8madd; color:#8f8a7e;}
+  .page-title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.01em; margin-bottom:4px; color:#2a271f;}
+  .page-sub{font-family:var(--serif); font-style:italic; font-size:15px; color:#8f8a7e; margin-bottom:36px;}
+
+  .stage{display:flex; gap:48px; flex-wrap:wrap; justify-content:center; align-items:flex-start;}
+  .frame-wrap{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .caption{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8f8a7e;}
+
+  /* ---- phone frame ---- */
+  .phone{
+    width:390px; height:844px; background:var(--sand); border-radius:46px;
+    box-shadow:0 2px 2px rgba(0,0,0,.04), 0 30px 60px -20px rgba(40,35,25,.45);
+    position:relative; overflow:hidden;
+    border:1px solid rgba(0,0,0,.06);
+    display:flex; flex-direction:column;
+  }
+  .statusbar{
+    height:54px; flex:0 0 54px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 30px 0 34px; font-size:15px; font-weight:600; color:var(--ink); z-index:5;
+  }
+  .statusbar .icons{display:flex; gap:6px; align-items:center; font-size:13px;}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--ink); border-radius:18px; z-index:6;}
+  .screen{flex:1; overflow:hidden; position:relative;}
+
+  /* ============ SCREEN 1 — TODAY'S TOUR ============ */
+  .s1{height:100%; display:flex; flex-direction:column; background:var(--sand);}
+  .s1-head{padding:8px 26px 0;}
+  .eyebrow{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .s1-title{font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-.015em; margin-top:6px; color:var(--ink);}
+  .agent-pill{
+    display:inline-flex; align-items:center; gap:9px; margin-top:16px;
+    background:var(--paper); border:1px solid var(--line-sand); border-radius:100px;
+    padding:6px 14px 6px 6px; font-size:13.5px; font-weight:500;
+  }
+  .agent-pill .av{width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#c9bda8,#8a7d63); position:relative; overflow:hidden;}
+  .av img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .agent-pill .chev{color:var(--ink-40); font-size:12px; margin-left:2px;}
+  .s1-progress{display:flex; align-items:center; gap:12px; margin-top:20px;}
+  .bar{flex:1; height:3px; background:var(--sand-2); border-radius:2px; overflow:hidden;}
+  .bar i{display:block; height:100%; width:41%; background:var(--ink); border-radius:2px;}
+  .s1-progress .count{font-size:12.5px; color:var(--ink-60); white-space:nowrap; letter-spacing:.01em;}
+  .s1-progress .count b{color:var(--ink); font-weight:600;}
+
+  .stops{margin-top:22px; padding:0 14px; overflow-y:auto; flex:1;}
+  .stop{
+    background:var(--paper); border:1px solid var(--line-sand); border-radius:18px;
+    padding:13px 14px; display:flex; align-items:center; gap:13px; margin-bottom:11px; position:relative;
+  }
+  .stop.active{border-color:rgba(0,122,255,.5); box-shadow:0 0 0 1px rgba(0,122,255,.25);}
+  .stop .thumb{width:54px; height:54px; flex:0 0 54px; border-radius:12px; overflow:hidden; position:relative;}
+  .stop .idx{position:absolute; top:3px; left:3px; z-index:2; font-size:9px; color:#fff; background:rgba(0,0,0,.4); border-radius:5px; padding:1px 4px; font-weight:700; letter-spacing:.05em;}
+  .ti{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  .hi{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  .stop .info{flex:1; min-width:0;}
+  .stop .addr{font-size:15px; font-weight:600; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .stop .meta{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .stop .meta .price{color:var(--ink); font-weight:600;}
+  .stop .right{display:flex; flex-direction:column; align-items:flex-end; gap:8px;}
+  .score{font-size:15px; font-weight:600; background:var(--ink); color:#fff; border-radius:9px; padding:3px 9px; letter-spacing:.01em;}
+  .score.empty{background:transparent; color:var(--accent); border:1px solid rgba(0,122,255,.35); font-weight:500; font-size:13px;}
+  .dirbtn{
+    display:flex; align-items:center; gap:5px; color:var(--accent); font-size:12.5px; font-weight:500;
+  }
+  .dirbtn svg{width:13px; height:13px;}
+  .stop .now{font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:2px;}
+
+  /* photographic placeholder */
+  .photo{
+    background:
+      radial-gradient(60px 40px at 30% 60%, rgba(255,196,120,.55), transparent 70%),
+      radial-gradient(50px 36px at 70% 55%, rgba(255,210,150,.5), transparent 70%),
+      linear-gradient(180deg,#6b7689 0%, #4a5163 38%, #2b2c33 78%, #1c1c20 100%);
+  }
+  .photo.b{ background:
+      radial-gradient(70px 40px at 64% 58%, rgba(255,190,120,.5), transparent 70%),
+      linear-gradient(180deg,#9aa1a6 0%, #5d6168 45%, #2e2f33 100%);}
+  .photo.c{ background:
+      radial-gradient(50px 40px at 40% 55%, rgba(255,200,130,.5), transparent 70%),
+      linear-gradient(165deg,#b9a98c 0%, #6d6353 50%, #2c2a26 100%);}
+
+  /* ============ SCREEN 2 — THE TAKE ============ */
+  .s2{height:100%; display:flex; flex-direction:column; background:var(--paper);}
+  .s2-top{display:flex; align-items:center; justify-content:space-between; padding:0 18px 10px;}
+  .s2-back{color:var(--accent); font-size:16px; font-weight:400; display:flex; align-items:center; gap:2px;}
+  .saved{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-40); letter-spacing:.02em;}
+  .saved .dot{width:6px; height:6px; border-radius:50%; background:#34C759;}
+
+  .hero{height:215px; flex:0 0 215px; position:relative; display:flex; align-items:flex-end;}
+  .hero .grad{position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.05) 35%, rgba(0,0,0,.78) 100%);}
+  .hero .chip{position:absolute; top:14px; left:14px; background:var(--ink); color:#fff; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; padding:6px 10px; border-radius:7px; z-index:2;}
+  .hero .info{position:relative; z-index:2; padding:16px 18px; color:#fff; width:100%;}
+  .hero .price{font-size:25px; font-weight:700; letter-spacing:-.02em;}
+  .hero .addr{font-size:13.5px; opacity:.92; margin-top:1px;}
+  .hero .stats{display:flex; gap:0; margin-top:12px;}
+  .hero .stat{padding-right:16px; margin-right:16px; border-right:1px solid rgba(255,255,255,.28); display:flex; align-items:baseline; gap:5px;}
+  .hero .stat:last-child{border-right:none;}
+  .hero .stat b{font-size:15px; font-weight:600;}
+  .hero .stat span{font-size:11px; opacity:.8; letter-spacing:.02em;}
+
+  .s2-body{flex:1; overflow-y:auto; padding:0 0 30px;}
+  .sect{padding:20px 20px 4px;}
+  .sect-label{font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .serif-prompt{font-family:var(--serif); font-style:italic; font-size:19px; color:var(--ink); margin-top:3px;}
+
+  /* overall 1-5 */
+  .overall{display:flex; gap:11px; padding:14px 20px 18px;}
+  .mark{flex:1; height:46px; border-radius:13px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; color:var(--ink-40); background:var(--paper);}
+  .mark.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  .hr{height:1px; background:var(--line); margin:0 20px;}
+
+  .cats{padding:6px 20px 8px;}
+  .cat{display:flex; align-items:center; justify-content:space-between; padding:13px 0; border-bottom:1px solid var(--line);}
+  .cat:last-child{border-bottom:none;}
+  .cat .name{font-size:15px; font-weight:500;}
+  .dots{display:flex; gap:7px;}
+  .dots i{width:11px; height:11px; border-radius:50%; border:1.5px solid var(--ink-40); display:block;}
+  .dots i.on{background:var(--ink); border-color:var(--ink);}
+
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; margin-top:6px;}
+  .toggle-row .lab{font-size:15px; font-weight:600;}
+  .toggle-row .sub{font-size:12px; color:var(--ink-40); margin-top:2px;}
+  .switch{width:48px; height:29px; border-radius:100px; background:var(--sand-2); position:relative; flex:0 0 48px;}
+  .switch i{position:absolute; top:2px; left:2px; width:25px; height:25px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2);}
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px; padding:10px 20px 4px;}
+  .chip{font-size:13px; padding:7px 13px; border-radius:100px; border:1px solid var(--line); color:var(--ink); display:flex; align-items:center; gap:6px;}
+  .chip.pro{border-color:rgba(10,10,10,.18);}
+  .chip.con{border-color:rgba(155,44,44,.32); color:var(--oxblood);}
+  .chip.add{color:var(--accent); border-color:rgba(0,122,255,.3); border-style:dashed;}
+  .twocol{display:flex; gap:26px; padding:4px 20px 0;}
+  .twocol .col{flex:1;}
+  .mini-label{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-40); font-weight:600; margin:14px 0 0 20px;}
+
+  .note{margin:10px 20px 0; border:1px solid var(--line); border-radius:14px; padding:13px 14px; font-size:14px; color:var(--ink-40); min-height:58px;}
+  .photos{display:flex; gap:10px; padding:14px 20px 0;}
+  .photo-thumb{width:62px; height:62px; border-radius:12px; position:relative; overflow:hidden;}
+  .add-photo{width:62px; height:62px; border-radius:12px; border:1.5px dashed rgba(0,122,255,.4); color:var(--accent); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10.5px; gap:3px;}
+  .add-photo .plus{font-size:20px; line-height:1;}
+</style>
+</head>
+<body>
+  <div class="page-title">Take</div>
+  <div class="page-sub">The buyer's take on every home — buyer app, two signature screens.</div>
+
+  <div class="stage">
+    <!-- ================= SCREEN 1 ================= -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+        <div class="screen">
+          <div class="s1">
+            <div class="s1-head">
+              <div class="eyebrow">Tuesday · June 9</div>
+              <div class="s1-title">Today's tour</div>
+              <div class="agent-pill"><span class="av"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=70&fit=crop&crop=faces" onerror="this.remove()"></span>Buying with Dana<span class="chev">⌄</span></div>
+              <div class="s1-progress">
+                <div class="bar"><i></i></div>
+                <div class="count"><b>5</b> of 12 takes</div>
+              </div>
+            </div>
+            <div class="stops">
+
+              <div class="stop">
+                <div class="thumb photo"><img class="ti" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=200&q=70" onerror="this.remove()"><span class="idx">01</span></div>
+                <div class="info">
+                  <div class="addr">204 Linden Avenue</div>
+                  <div class="meta"><span class="price">$1.85M</span> · 4 bd · 3 ba</div>
+                </div>
+                <div class="right">
+                  <div class="score">4.2</div>
+                  <div class="dirbtn">Done</div>
+                </div>
+              </div>
+
+              <div class="stop">
+                <div class="thumb photo b"><img class="ti" src="https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=200&q=70" onerror="this.remove()"><span class="idx">02</span></div>
+                <div class="info">
+                  <div class="addr">77 Serrano Drive</div>
+                  <div class="meta"><span class="price">$2.69M</span> · 6 bd · 7 ba</div>
+                </div>
+                <div class="right">
+                  <div class="score">3.6</div>
+                  <div class="dirbtn">Done</div>
+                </div>
+              </div>
+
+              <div class="stop active">
+                <div class="thumb photo c"><img class="ti" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=70" onerror="this.remove()"><span class="idx">03</span></div>
+                <div class="info">
+                  <div class="now">Now</div>
+                  <div class="addr">513 Mills Street</div>
+                  <div class="meta"><span class="price">$2.87M</span> · 5 bd · 4 ba</div>
+                </div>
+                <div class="right">
+                  <div class="score empty">Add take</div>
+                  <div class="dirbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div>
+                </div>
+              </div>
+
+              <div class="stop">
+                <div class="thumb photo b"><img class="ti" src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=200&q=70" onerror="this.remove()"><span class="idx">04</span></div>
+                <div class="info">
+                  <div class="addr">9 Greenbrier Court</div>
+                  <div class="meta"><span class="price">$2.1M</span> · 4 bd · 3 ba</div>
+                </div>
+                <div class="right">
+                  <div class="score empty">Add take</div>
+                  <div class="dirbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div>
+                </div>
+              </div>
+
+              <div class="stop">
+                <div class="thumb photo"><img class="ti" src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&q=70" onerror="this.remove()"><span class="idx">05</span></div>
+                <div class="info">
+                  <div class="addr">1288 N Oceanview Drive</div>
+                  <div class="meta"><span class="price">$2.65M</span> · 5 bd · 5 ba</div>
+                </div>
+                <div class="right">
+                  <div class="score empty">Add take</div>
+                  <div class="dirbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption">Today's tour</div>
+    </div>
+
+    <!-- ================= SCREEN 2 ================= -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+        <div class="screen">
+          <div class="s2">
+            <div class="s2-top">
+              <div class="s2-back">‹ Tour</div>
+              <div class="saved"><span class="dot"></span>Saved</div>
+            </div>
+            <div class="hero photo c">
+              <img class="hi" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=75" onerror="this.remove()">
+              <div class="grad"></div>
+              <div class="chip">Stop 3 of 12</div>
+              <div class="info">
+                <div class="price">$2,870,000</div>
+                <div class="addr">513 Mills Street, Atherton CA</div>
+                <div class="stats">
+                  <div class="stat"><b>5</b><span>Beds</span></div>
+                  <div class="stat"><b>4</b><span>Baths</span></div>
+                  <div class="stat"><b>3,940</b><span>Sq Ft</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="s2-body">
+              <div class="sect">
+                <div class="sect-label">Overall</div>
+                <div class="serif-prompt">What's your take?</div>
+              </div>
+              <div class="overall">
+                <div class="mark">1</div>
+                <div class="mark">2</div>
+                <div class="mark">3</div>
+                <div class="mark on">4</div>
+                <div class="mark">5</div>
+              </div>
+
+              <div class="hr"></div>
+
+              <div class="cats">
+                <div class="cat"><span class="name">Layout / flow</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+                <div class="cat"><span class="name">Kitchen</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+                <div class="cat"><span class="name">Primary suite</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+                <div class="cat"><span class="name">Condition</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+                <div class="cat"><span class="name">Outdoor space</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+                <div class="cat"><span class="name">Location</span><span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></div>
+                <div class="cat"><span class="name">Value for price</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+              </div>
+
+              <div class="hr"></div>
+
+              <div class="toggle-row">
+                <div>
+                  <div class="lab">Deal-breaker</div>
+                  <div class="sub">A hard no, louder than a low score</div>
+                </div>
+                <div class="switch"><i></i></div>
+              </div>
+
+              <div class="hr"></div>
+
+              <div class="mini-label">Pros</div>
+              <div class="chips">
+                <span class="chip pro">Great light</span>
+                <span class="chip pro">Big yard</span>
+                <span class="chip add">＋ Add</span>
+              </div>
+              <div class="mini-label">Cons</div>
+              <div class="chips">
+                <span class="chip con">Busy street</span>
+                <span class="chip con">Small closets</span>
+                <span class="chip add">＋ Add</span>
+              </div>
+
+              <div class="mini-label">Note</div>
+              <div class="note">Anything else worth remembering?</div>
+
+              <div class="mini-label">Photos</div>
+              <div class="photos">
+                <div class="photo-thumb photo"><img class="ti" src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=160&q=70" onerror="this.remove()"></div>
+                <div class="photo-thumb photo b"><img class="ti" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=160&q=70" onerror="this.remove()"></div>
+                <div class="add-photo"><span class="plus">＋</span>Add</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption">The take — guided feedback</div>
+    </div>
+  </div>
+</body>
+</html>

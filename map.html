@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Tour Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-2:#1A1A1A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line:#ECECEC; --line-sand:#E3DED4;
+    --accent:#007AFF; --accent-press:#0062CC; --oxblood:#9B2C2C;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--sans); color:var(--ink); background:#E5DFD3; padding:56px 40px 72px; display:flex; flex-direction:column; align-items:center;}
+  .page-title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.01em; margin-bottom:4px; color:#2a271f;}
+  .page-sub{font-family:var(--serif); font-style:italic; font-size:15px; color:#8f8a7e; margin-bottom:36px;}
+  .frame-wrap{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .caption{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8f8a7e;}
+
+  .phone{width:390px; height:844px; background:var(--paper); border-radius:46px; box-shadow:0 2px 2px rgba(0,0,0,.04), 0 30px 60px -20px rgba(40,35,25,.45); position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.06); display:flex; flex-direction:column;}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--ink); border-radius:18px; z-index:20;}
+  .statusbar{height:54px; flex:0 0 54px; display:flex; align-items:center; justify-content:space-between; padding:0 30px 0 34px; font-size:15px; font-weight:600; z-index:15;}
+  .statusbar .icons{display:flex; gap:6px; font-size:13px;}
+
+  /* header */
+  .m-top{display:flex; align-items:center; justify-content:space-between; padding:0 18px 0;}
+  .m-top .back{color:var(--accent); font-size:16px;}
+  .seg{display:flex; background:var(--sand-2); border-radius:9px; padding:2px;}
+  .seg span{font-size:13px; font-weight:600; color:var(--ink-60); padding:5px 14px; border-radius:7px;}
+  .seg span.on{background:var(--paper); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  .m-context{padding:10px 24px 12px; font-size:13px; color:var(--ink-60);}
+  .m-context b{color:var(--ink); font-weight:600;}
+
+  /* map */
+  .map{position:relative; width:390px; height:466px; flex:0 0 466px; overflow:hidden; background:#EFEBE2;}
+  .map svg.base{position:absolute; inset:0;}
+  .legend{position:absolute; top:12px; left:12px; background:rgba(255,255,255,.92); border:1px solid var(--line-sand); border-radius:11px; padding:8px 11px; font-size:11px; display:flex; flex-direction:column; gap:6px; z-index:5; backdrop-filter:blur(4px);}
+  .legend .lrow{display:flex; align-items:center; gap:7px; color:var(--ink-60); font-weight:500;}
+  .legend .dotk{width:13px; height:13px; border-radius:50%; flex:0 0 13px;}
+  .legend .dotk.stop{background:var(--ink);}
+  .legend .dotk.place{background:#fff; border:1.5px solid var(--accent);}
+
+  .pin{position:absolute; transform:translate(-50%,-50%); z-index:6;}
+  .stoppin{width:30px; height:30px; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; border:2.5px solid #fff; box-shadow:0 2px 7px rgba(0,0,0,.32);}
+  .stoppin.active{background:var(--accent); transform:scale(1.12); box-shadow:0 0 0 4px rgba(0,122,255,.22), 0 3px 8px rgba(0,0,0,.3);}
+  .placepin{position:absolute; transform:translate(-50%,-50%); z-index:6;}
+  .placeicon{width:34px; height:34px; border-radius:50%; background:#fff; border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .placeicon svg{width:17px; height:17px; color:var(--accent);}
+  .placelabel{position:absolute; top:38px; left:50%; transform:translateX(-50%); font-size:9px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--accent); background:#fff; border:1px solid rgba(0,122,255,.25); border-radius:100px; padding:2px 7px; white-space:nowrap;}
+
+  /* bottom sheet */
+  .sheet{flex:1; background:var(--paper); border-top:1px solid var(--line); margin-top:-18px; border-radius:20px 20px 0 0; box-shadow:0 -6px 20px -8px rgba(40,35,25,.18); position:relative; z-index:10; padding:0 0 22px;}
+  .grab{width:38px; height:5px; border-radius:3px; background:var(--sand-2); margin:9px auto 4px;}
+  .sheet-row{display:flex; align-items:center; gap:13px; padding:8px 20px 4px;}
+  .sp-num{width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex:0 0 28px;}
+  .sp-info{flex:1; min-width:0;}
+  .sp-addr{font-size:16px; font-weight:600; letter-spacing:-.01em;}
+  .sp-meta{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .sp-dir{display:flex; align-items:center; gap:5px; color:var(--accent); font-size:13px; font-weight:600;}
+  .sp-dir svg{width:14px; height:14px;}
+  .prox-lab{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-40); font-weight:700; padding:16px 20px 0;}
+  .prox{display:flex; flex-direction:column; gap:0; padding:8px 20px 0;}
+  .prow{display:flex; align-items:center; gap:11px; padding:10px 0; border-bottom:1px solid var(--line);}
+  .prow:last-child{border-bottom:none;}
+  .prow .picon{width:26px; height:26px; border-radius:7px; background:var(--sand); display:flex; align-items:center; justify-content:center; flex:0 0 26px;}
+  .prow .picon svg{width:14px; height:14px; color:var(--accent);}
+  .prow .pname{flex:1; font-size:14px; font-weight:500;}
+  .prow .ptime{font-size:14px; font-weight:600;}
+  .prow .ptime span{font-size:12px; color:var(--ink-60); font-weight:400;}
+</style>
+</head>
+<body>
+  <div class="page-title">Take</div>
+  <div class="page-sub">The tour, on a map — stops in order, plus the places that matter to them.</div>
+
+  <div class="frame-wrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+
+      <div class="m-top">
+        <span class="back">‹ Tour</span>
+        <div class="seg"><span>List</span><span class="on">Map</span></div>
+        <span style="width:46px"></span>
+      </div>
+      <div class="m-context"><b>Tuesday, June 9</b> · 5 stops · Marcus &amp; Lena</div>
+
+      <!-- MAP -->
+      <div class="map">
+        <svg class="base" viewBox="0 0 390 466" preserveAspectRatio="xMidYMid slice">
+          <!-- park -->
+          <rect x="206" y="232" width="150" height="150" rx="14" fill="#D8DCC8"/>
+          <!-- water -->
+          <path d="M0 410 Q70 392 140 412 T300 420 L300 466 L0 466 Z" fill="#CBD8DC"/>
+          <!-- minor blocks -->
+          <g fill="#E7E2D6">
+            <rect x="22" y="60" width="90" height="70" rx="4"/>
+            <rect x="130" y="40" width="80" height="60" rx="4"/>
+            <rect x="40" y="250" width="100" height="90" rx="4"/>
+            <rect x="250" y="60" width="110" height="120" rx="4"/>
+          </g>
+          <!-- streets -->
+          <g stroke="#FFFFFF" stroke-width="9" stroke-linecap="round">
+            <path d="M0 150 H390"/>
+            <path d="M0 230 H390"/>
+            <path d="M120 0 V466"/>
+            <path d="M235 0 V466"/>
+          </g>
+          <g stroke="#F4F0E7" stroke-width="4" stroke-linecap="round">
+            <path d="M0 100 H390"/>
+            <path d="M0 320 H390"/>
+            <path d="M60 0 V466"/>
+            <path d="M300 0 V466"/>
+            <path d="M0 0 L200 200"/>
+            <path d="M390 90 L210 280"/>
+          </g>
+          <!-- tour route (Tier 1: straight connectors in tour order) -->
+          <polyline points="70,120 185,95 258,185 175,300 95,372" fill="none" stroke="#0A0A0A" stroke-width="2.6" stroke-dasharray="1 8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+        </svg>
+
+        <div class="legend">
+          <div class="lrow"><span class="dotk stop"></span>Tour stops</div>
+          <div class="lrow"><span class="dotk place"></span>Their places</div>
+        </div>
+
+        <!-- key-location pins (blue layer) -->
+        <div class="placepin" style="left:308px; top:100px;">
+          <div class="placeicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+          <span class="placelabel">Work</span>
+        </div>
+        <div class="placepin" style="left:122px; top:210px;">
+          <div class="placeicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11v5c0 1 2.2 2.5 5 2.5s5-1.5 5-2.5v-5"/></svg></div>
+          <span class="placelabel">School</span>
+        </div>
+        <div class="placepin" style="left:300px; top:338px;">
+          <div class="placeicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6M9 6h6M5 21V11l7-4 7 4v10M9 21v-5h6v5"/></svg></div>
+          <span class="placelabel">Church</span>
+        </div>
+
+        <!-- tour stop pins (ink layer) -->
+        <div class="pin" style="left:70px; top:120px;"><div class="stoppin">1</div></div>
+        <div class="pin" style="left:185px; top:95px;"><div class="stoppin">2</div></div>
+        <div class="pin" style="left:258px; top:185px;"><div class="stoppin active">3</div></div>
+        <div class="pin" style="left:175px; top:300px;"><div class="stoppin">4</div></div>
+        <div class="pin" style="left:95px; top:372px;"><div class="stoppin">5</div></div>
+      </div>
+
+      <!-- BOTTOM SHEET -->
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="sheet-row">
+          <div class="sp-num">3</div>
+          <div class="sp-info"><div class="sp-addr">513 Mills Street</div><div class="sp-meta">$2.87M · 5 bd · 4 ba · 11:30 AM</div></div>
+          <div class="sp-dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>Directions</div>
+        </div>
+        <div class="prox-lab">How it fits their life</div>
+        <div class="prox">
+          <div class="prow">
+            <span class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+            <span class="pname">Lena’s office</span>
+            <span class="ptime">11 min <span>drive</span></span>
+          </div>
+          <div class="prow">
+            <span class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11v5c0 1 2.2 2.5 5 2.5s5-1.5 5-2.5v-5"/></svg></span>
+            <span class="pname">Westfield Elementary</span>
+            <span class="ptime">6 min <span>drive</span></span>
+          </div>
+          <div class="prow">
+            <span class="picon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6M9 6h6M5 21V11l7-4 7 4v10M9 21v-5h6v5"/></svg></span>
+            <span class="pname">Grace Chapel</span>
+            <span class="ptime">5 min <span>drive</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Tour map — stops + their places</div>
+  </div>
+</body>
+</html>

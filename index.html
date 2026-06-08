@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line-sand:#E3DED4; --accent:#007AFF;
+    --serif:'Fraunces', Georgia, serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--sans); color:var(--ink); background:#E5DFD3; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:64px 22px 80px;}
+  .wrap{width:100%; max-width:460px;}
+  .eyebrow{font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink-40); font-weight:600; text-align:center;}
+  .wordmark{font-family:var(--serif); font-size:72px; font-weight:400; letter-spacing:-.02em; line-height:1; text-align:center; margin-top:12px;}
+  .tagline{font-family:var(--serif); font-style:italic; font-size:18px; color:var(--ink-60); text-align:center; margin-top:16px; line-height:1.4;}
+  .cta{display:flex; align-items:center; justify-content:center; gap:9px; width:100%; background:var(--ink); color:#fff; font-size:17px; font-weight:600; padding:18px; border-radius:16px; text-decoration:none; margin-top:36px;}
+  .cta:active{background:#1a1a1a;}
+  .note{font-size:12.5px; color:var(--ink-40); text-align:center; margin-top:14px;}
+
+  .sect{font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:600; margin:44px 0 6px 4px;}
+  .links{display:flex; flex-direction:column; background:var(--paper); border:1px solid var(--line-sand); border-radius:18px; overflow:hidden;}
+  .row{display:flex; align-items:center; gap:14px; padding:16px 18px; text-decoration:none; color:var(--ink); border-bottom:1px solid #f0ece4;}
+  .row:last-child{border-bottom:none;}
+  .row:active{background:var(--sand);}
+  .row .n{font-size:15.5px; font-weight:600; letter-spacing:-.01em;}
+  .row .d{font-size:12.5px; color:var(--ink-60); margin-top:2px;}
+  .row .who{flex:0 0 auto; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; padding:4px 9px; border-radius:100px;}
+  .who.buyer{color:var(--accent); border:1px solid rgba(0,122,255,.3);}
+  .who.agent{color:var(--ink-60); border:1px solid var(--line-sand);}
+  .row .txt{flex:1; min-width:0;}
+  .chev{color:var(--ink-40); font-size:18px; flex:0 0 auto;}
+  .foot{text-align:center; font-size:11.5px; color:var(--ink-40); margin-top:40px; line-height:1.6;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Prototype · iOS</div>
+    <div class="wordmark">Take</div>
+    <div class="tagline">The home you’ll remember —<br>and the ones you won’t.</div>
+
+    <a class="cta" href="app.html">▶ &nbsp;Open the interactive demo</a>
+    <div class="note">Tap through the whole story — best on a phone.</div>
+
+    <div class="sect">Individual screens</div>
+    <div class="links">
+      <a class="row" href="onboarding.html"><div class="txt"><div class="n">Onboarding</div><div class="d">Invite → set up → paired</div></div><span class="who buyer">Buyer</span><span class="chev">›</span></a>
+      <a class="row" href="buyer.html"><div class="txt"><div class="n">Today’s tour &amp; The take</div><div class="d">The showing day + guided feedback</div></div><span class="who buyer">Buyer</span><span class="chev">›</span></a>
+      <a class="row" href="map.html"><div class="txt"><div class="n">Tour map</div><div class="d">Stops in order + their pinned places</div></div><span class="who buyer">Buyer</span><span class="chev">›</span></a>
+      <a class="row" href="history.html"><div class="txt"><div class="n">History</div><div class="d">Every home seen, with their ratings</div></div><span class="who buyer">Buyer</span><span class="chev">›</span></a>
+      <a class="row" href="agent-home.html"><div class="txt"><div class="n">Roster &amp; tour builder</div><div class="d">The agent’s front door</div></div><span class="who agent">Agent</span><span class="chev">›</span></a>
+      <a class="row" href="agent-recap.html"><div class="txt"><div class="n">Tour recap</div><div class="d">The ranked, pattern-aware payoff</div></div><span class="who agent">Agent</span><span class="chev">›</span></a>
+    </div>
+
+    <div class="foot">A companion app for real estate agents &amp; their buyers.<br>Concept prototype — design only, not yet wired to a backend.</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Buyer History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-2:#1A1A1A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line:#ECECEC; --line-sand:#E3DED4;
+    --accent:#007AFF; --accent-press:#0062CC; --oxblood:#9B2C2C;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--sans); color:var(--ink); background:#E5DFD3; padding:56px 40px 72px; display:flex; flex-direction:column; align-items:center;}
+  .page-title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.01em; margin-bottom:4px; color:#2a271f;}
+  .page-sub{font-family:var(--serif); font-style:italic; font-size:15px; color:#8f8a7e; margin-bottom:36px;}
+  .frame-wrap{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .caption{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8f8a7e;}
+
+  .phone{width:390px; height:844px; background:var(--sand); border-radius:46px; box-shadow:0 2px 2px rgba(0,0,0,.04), 0 30px 60px -20px rgba(40,35,25,.45); position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.06); display:flex; flex-direction:column;}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--ink); border-radius:18px; z-index:20;}
+  .statusbar{height:54px; flex:0 0 54px; display:flex; align-items:center; justify-content:space-between; padding:0 30px 0 34px; font-size:15px; font-weight:600; z-index:15;}
+  .statusbar .icons{display:flex; gap:6px; font-size:13px;}
+  .screen{flex:1; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+  .ti{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+
+  .body{flex:1; overflow-y:auto;}
+  .h-head{padding:8px 24px 0;}
+  .eyebrow{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .h-title{font-family:var(--serif); font-size:34px; font-weight:400; letter-spacing:-.015em; margin-top:6px;}
+  .h-sub{font-size:13px; color:var(--ink-60); margin-top:8px;}
+  .h-sub b{color:var(--ink); font-weight:600;}
+
+  /* shortlist rail */
+  .sl-lab{display:flex; align-items:center; gap:6px; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-40); font-weight:600; padding:22px 24px 0;}
+  .sl-lab .star{color:var(--accent); font-size:12px; letter-spacing:0;}
+  .sl-rail{display:flex; gap:12px; overflow-x:auto; padding:12px 24px 6px;}
+  .sl-card{flex:0 0 150px; width:150px; background:var(--paper); border:1px solid var(--line-sand); border-radius:16px; overflow:hidden;}
+  .sl-photo{height:100px; position:relative; background:linear-gradient(165deg,#b9a98c,#5c5346);}
+  .sl-score{position:absolute; top:8px; right:8px; z-index:2; font-size:13px; font-weight:700; background:var(--ink); color:#fff; border-radius:8px; padding:2px 7px;}
+  .sl-info{padding:10px 12px 12px;}
+  .sl-addr{font-size:13.5px; font-weight:600; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sl-meta{font-size:11.5px; color:var(--ink-60); margin-top:2px;}
+
+  /* grouped list */
+  .grp-lab{font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-40); font-weight:600; padding:20px 24px 2px;}
+  .grp-lab b{color:var(--ink-60);}
+  .list{padding:4px 18px 0;}
+  .hrow{display:flex; align-items:center; gap:13px; padding:12px 6px; border-bottom:1px solid var(--line);}
+  .hrow:last-child{border-bottom:none;}
+  .hthumb{width:50px; height:50px; border-radius:11px; overflow:hidden; position:relative; flex:0 0 50px; background:linear-gradient(165deg,#b9a98c,#5c5346);}
+  .hinfo{flex:1; min-width:0;}
+  .haddr{font-size:15px; font-weight:600; letter-spacing:-.01em;}
+  .htags{font-size:12px; color:var(--ink-60); margin-top:3px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .tg{border:1px solid rgba(10,10,10,.16); border-radius:100px; padding:2px 8px; font-size:11px; color:var(--ink-60);}
+  .db{display:inline-flex; align-items:center; gap:5px; color:var(--oxblood); font-size:11.5px; font-weight:600;}
+  .db .d{width:5px; height:5px; border-radius:50%; background:var(--oxblood);}
+  .sc{flex:0 0 auto; font-size:15px; font-weight:600; background:var(--ink); color:#fff; border-radius:9px; padding:4px 10px; min-width:44px; text-align:center;}
+  .sc.mid{background:var(--ink-2);}
+  .sc.low{background:var(--paper); color:var(--oxblood); border:1px solid rgba(155,44,44,.35);}
+
+  /* tab bar */
+  .tabbar{flex:0 0 64px; background:var(--paper); border-top:1px solid var(--line-sand); display:flex; align-items:flex-start; padding-top:9px;}
+  .tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--ink-40); font-size:10px;}
+  .tab.on{color:var(--ink);}
+  .tab svg{width:23px; height:23px;}
+</style>
+</head>
+<body>
+  <div class="page-title">Take</div>
+  <div class="page-sub">Buyer history — every home they’ve seen, with their take, kept over time.</div>
+
+  <div class="frame-wrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+      <div class="screen">
+        <div class="body">
+          <div class="h-head">
+            <div class="eyebrow">Marcus &amp; Lena</div>
+            <div class="h-title">Your homes</div>
+            <div class="h-sub"><b>23</b> seen · 5 touring days · with Dana</div>
+          </div>
+
+          <div class="sl-lab"><span class="star">★</span> Shortlist</div>
+          <div class="sl-rail">
+            <div class="sl-card">
+              <div class="sl-photo"><img class="ti" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=320&q=70" onerror="this.remove()"><span class="sl-score">4.6</span></div>
+              <div class="sl-info"><div class="sl-addr">204 Linden Avenue</div><div class="sl-meta">$1.85M · Jun 9</div></div>
+            </div>
+            <div class="sl-card">
+              <div class="sl-photo"><img class="ti" src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=320&q=70" onerror="this.remove()"><span class="sl-score">4.4</span></div>
+              <div class="sl-info"><div class="sl-addr">88 Marigold Lane</div><div class="sl-meta">$1.95M · Jun 2</div></div>
+            </div>
+            <div class="sl-card">
+              <div class="sl-photo"><img class="ti" src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=320&q=70" onerror="this.remove()"><span class="sl-score">4.1</span></div>
+              <div class="sl-info"><div class="sl-addr">1288 N Oceanview Dr</div><div class="sl-meta">$2.65M · Jun 9</div></div>
+            </div>
+          </div>
+
+          <div class="grp-lab">Tuesday, Jun 9 · <b>5 homes</b></div>
+          <div class="list">
+            <div class="hrow">
+              <div class="hthumb"><img class="ti" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=130&q=70" onerror="this.remove()"></div>
+              <div class="hinfo"><div class="haddr">204 Linden Avenue</div><div class="htags"><span class="tg">Great light</span><span class="tg">Big yard</span></div></div>
+              <div class="sc">4.6</div>
+            </div>
+            <div class="hrow">
+              <div class="hthumb"><img class="ti" src="https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=130&q=70" onerror="this.remove()"></div>
+              <div class="hinfo"><div class="haddr">77 Serrano Drive</div><div class="htags"><span class="tg">Big rooms</span></div></div>
+              <div class="sc mid">3.6</div>
+            </div>
+            <div class="hrow">
+              <div class="hthumb"><img class="ti" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=130&q=70" onerror="this.remove()"></div>
+              <div class="hinfo"><div class="haddr">513 Mills Street</div><div class="htags"><span class="db"><span class="d"></span>Deal-breaker · Busy street</span></div></div>
+              <div class="sc low">2.4</div>
+            </div>
+          </div>
+
+          <div class="grp-lab">Monday, Jun 2 · <b>4 homes</b></div>
+          <div class="list">
+            <div class="hrow">
+              <div class="hthumb"><img class="ti" src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=130&q=70" onerror="this.remove()"></div>
+              <div class="hinfo"><div class="haddr">88 Marigold Lane</div><div class="htags"><span class="tg">Updated kitchen</span><span class="tg">Quiet street</span></div></div>
+              <div class="sc">4.4</div>
+            </div>
+            <div class="hrow">
+              <div class="hthumb"><img class="ti" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=130&q=70" onerror="this.remove()"></div>
+              <div class="hinfo"><div class="haddr">12 Foxglove Way</div><div class="htags"><span class="tg con" style="border-color:rgba(155,44,44,.3);color:var(--oxblood)">Small kitchen</span></div></div>
+              <div class="sc mid">3.2</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabbar">
+          <div class="tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/></svg>
+            Today
+          </div>
+          <div class="tab on">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
+            History
+          </div>
+          <div class="tab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19.5c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">Buyer — history</div>
+  </div>
+</body>
+</html>

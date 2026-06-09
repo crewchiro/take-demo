@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Take — Add property (PDF)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A0A; --ink-2:#1A1A1A; --ink-60:#6B6B6B; --ink-40:#9A9A9A;
+    --paper:#fff; --sand:#F5F2EC; --sand-2:#EAE5DC;
+    --line:#ECECEC; --line-sand:#E3DED4; --accent:#007AFF; --green:#34A853; --oxblood:#9B2C2C;
+    --serif:'Fraunces', Georgia, serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{font-family:var(--sans); color:var(--ink); background:#E5DFD3; padding:56px 40px 72px; display:flex; flex-direction:column; align-items:center;}
+  .page-title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.01em; margin-bottom:4px; color:#2a271f;}
+  .page-sub{font-family:var(--serif); font-style:italic; font-size:15px; color:#8f8a7e; margin-bottom:36px; text-align:center;}
+  .stage{display:flex; gap:48px; flex-wrap:wrap; justify-content:center; align-items:flex-start;}
+  .frame-wrap{display:flex; flex-direction:column; align-items:center; gap:16px;}
+  .caption{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#8f8a7e;}
+
+  .phone{width:390px; height:844px; background:var(--paper); border-radius:46px; box-shadow:0 2px 2px rgba(0,0,0,.04), 0 30px 60px -20px rgba(40,35,25,.45); position:relative; overflow:hidden; border:1px solid rgba(0,0,0,.06); display:flex; flex-direction:column;}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--ink); border-radius:18px; z-index:20;}
+  .statusbar{height:54px; flex:0 0 54px; display:flex; align-items:center; justify-content:space-between; padding:0 30px 0 34px; font-size:15px; font-weight:600; z-index:15;}
+  .statusbar .icons{display:flex; gap:6px; font-size:13px;}
+  .screen{flex:1; overflow:hidden; position:relative; display:flex; flex-direction:column;}
+
+  .nav{display:flex; align-items:center; justify-content:space-between; padding:0 18px 6px;}
+  .nav .back{color:var(--accent); font-size:16px;}
+  .nav .rt{color:var(--ink-40); font-size:14px;}
+  .head{padding:6px 24px 0;}
+  .eyebrow{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .title{font-family:var(--serif); font-size:30px; font-weight:400; letter-spacing:-.015em; margin-top:5px;}
+  .sub{font-size:14px; color:var(--ink-60); margin-top:8px; line-height:1.45;}
+
+  .body{flex:1; overflow-y:auto; padding:2px 0 0;}
+
+  /* upload state */
+  .drop{margin:24px 22px 0; border:1.5px dashed rgba(0,122,255,.4); background:rgba(0,122,255,.03); border-radius:18px; padding:30px 18px; display:flex; flex-direction:column; align-items:center; text-align:center;}
+  .drop .ic{width:54px; height:54px; border-radius:14px; background:var(--paper); border:1px solid var(--line-sand); display:flex; align-items:center; justify-content:center; margin-bottom:14px;}
+  .drop .ic svg{width:26px; height:26px; color:var(--accent);}
+  .drop .big{font-size:16px; font-weight:600;}
+  .drop .small{font-size:12.5px; color:var(--ink-60); margin-top:4px;}
+  .ordiv{display:flex; align-items:center; gap:12px; color:var(--ink-40); font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:18px 24px 4px;}
+  .ordiv:before,.ordiv:after{content:""; flex:1; height:1px; background:var(--line);}
+  .manual{display:flex; align-items:center; justify-content:center; gap:8px; margin:8px 22px 0; border:1px solid var(--line-sand); border-radius:13px; padding:14px; color:var(--accent); font-size:15px; font-weight:500;}
+  .manual svg{width:16px; height:16px;}
+  .reassure{font-size:12px; color:var(--ink-40); text-align:center; padding:22px 28px 0; line-height:1.5;}
+  .reassure b{color:var(--ink-60); font-weight:600;}
+
+  /* review state */
+  .filechip{display:flex; align-items:center; gap:11px; margin:20px 22px 0; background:var(--sand); border:1px solid var(--line-sand); border-radius:14px; padding:12px 14px;}
+  .filechip .fic{width:34px; height:40px; border-radius:6px; background:var(--paper); border:1px solid var(--line-sand); display:flex; align-items:center; justify-content:center; flex:0 0 34px;}
+  .filechip .fic svg{width:18px; height:18px; color:var(--oxblood);}
+  .filechip .fn{flex:1; min-width:0;}
+  .filechip .fname{font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .filechip .fstat{font-size:11.5px; color:var(--green); font-weight:600; margin-top:2px; display:flex; align-items:center; gap:4px;}
+  .filechip .fstat svg{width:12px; height:12px;}
+  .rv-lab{font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-40); font-weight:600; padding:20px 24px 0;}
+  .fields{padding:8px 22px 0;}
+  .field{border:1px solid var(--line-sand); background:var(--paper); border-radius:13px; padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; gap:10px;}
+  .field .fl{flex:1; min-width:0;}
+  .field .lab2{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-40); font-weight:600;}
+  .field .val{font-size:16px; margin-top:2px; font-weight:500;}
+  .frompdf{flex:0 0 auto; font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); background:rgba(0,122,255,.08); border:1px solid rgba(0,122,255,.2); border-radius:100px; padding:3px 8px; display:flex; align-items:center; gap:4px;}
+  .frompdf svg{width:10px; height:10px;}
+  .photorow{display:flex; align-items:center; gap:11px; margin:4px 22px 0; border:1px solid var(--line-sand); border-radius:13px; padding:12px 14px;}
+  .photorow .pic{width:40px; height:40px; border-radius:9px; border:1.5px dashed rgba(0,122,255,.4); display:flex; align-items:center; justify-content:center; color:var(--accent); flex:0 0 40px;}
+  .photorow .pic svg{width:18px; height:18px;}
+  .photorow .pt{flex:1;}
+  .photorow .pn{font-size:14px; font-weight:500;}
+  .photorow .ps{font-size:11.5px; color:var(--ink-60); margin-top:2px;}
+  .photorow .add{color:var(--accent); font-size:13px; font-weight:600;}
+  .foot{flex:0 0 auto; padding:14px 22px 24px; border-top:1px solid var(--line);}
+  .cta{display:block; width:100%; text-align:center; background:var(--ink); color:#fff; font-size:16px; font-weight:600; padding:15px; border-radius:14px;}
+  .fineprint{font-size:11px; color:var(--ink-40); text-align:center; margin-top:12px; line-height:1.45;}
+</style>
+</head>
+<body>
+  <div class="page-title">Take</div>
+  <div class="page-sub">Agent adds a property by uploading the listing PDF — Take pulls just the facts.</div>
+
+  <div class="stage">
+
+    <!-- 1 · UPLOAD -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+        <div class="screen">
+          <div class="nav"><span class="back">‹ New tour</span><span class="rt">Cancel</span></div>
+          <div class="head">
+            <div class="eyebrow">Add a property</div>
+            <div class="title">Drop the listing</div>
+            <div class="sub">Upload the listing PDF — Take reads the price, beds, baths, and size for you.</div>
+          </div>
+          <div class="body">
+            <div class="drop">
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></div>
+              <div class="big">Upload listing PDF</div>
+              <div class="small">From FMLS, the listing agent, anywhere</div>
+            </div>
+            <div class="ordiv">or</div>
+            <div class="manual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Enter the address manually</div>
+            <div class="reassure">Take reads the <b>facts only</b> — price, beds, baths, size. Never the listing photos or description.</div>
+          </div>
+        </div>
+      </div>
+      <div class="caption">1 · Upload</div>
+    </div>
+
+    <!-- 2 · REVIEW -->
+    <div class="frame-wrap">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="statusbar"><span>9:41</span><span class="icons">􀙇 􀊰 􀛨</span></div>
+        <div class="screen">
+          <div class="nav"><span class="back">‹ Back</span><span class="rt">Cancel</span></div>
+          <div class="head">
+            <div class="eyebrow">Add a property</div>
+            <div class="title">Review &amp; add</div>
+          </div>
+          <div class="body">
+            <div class="filechip">
+              <div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></div>
+              <div class="fn">
+                <div class="fname">98_Academy_St_listing.pdf</div>
+                <div class="fstat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Facts extracted</div>
+              </div>
+            </div>
+
+            <div class="rv-lab">Pulled from the PDF</div>
+            <div class="fields">
+              <div class="field"><div class="fl"><div class="lab2">Address</div><div class="val">98 Academy Street, Alpharetta GA</div></div><span class="frompdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>PDF</span></div>
+              <div class="field"><div class="fl"><div class="lab2">List price</div><div class="val">$785,000</div></div><span class="frompdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>PDF</span></div>
+              <div class="field"><div class="fl"><div class="lab2">Beds</div><div class="val">3</div></div><span class="frompdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>PDF</span></div>
+              <div class="field"><div class="fl"><div class="lab2">Baths</div><div class="val">2</div></div><span class="frompdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>PDF</span></div>
+              <div class="field"><div class="fl"><div class="lab2">Square feet</div><div class="val">2,140</div></div><span class="frompdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>PDF</span></div>
+            </div>
+
+            <div class="rv-lab">Photo</div>
+            <div class="photorow">
+              <div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.2"/><path d="M8 6l1.5-2h5L16 6"/></svg></div>
+              <div class="pt"><div class="pn">Add a photo</div><div class="ps">Your own shot, or a street view</div></div>
+              <span class="add">Add</span>
+            </div>
+          </div>
+          <div class="foot">
+            <span class="cta">Add to tour</span>
+            <div class="fineprint">Facts come from your uploaded PDF — you can edit any field before adding.</div>
+          </div>
+        </div>
+      </div>
+      <div class="caption">2 · Review &amp; add</div>
+    </div>
+
+  </div>
+</body>
+</html>

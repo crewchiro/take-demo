@@ -191,8 +191,8 @@
               <div class="stop">
                 <div class="thumb photo"><img class="ti" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=200&q=70" onerror="this.remove()"><span class="idx">01</span></div>
                 <div class="info">
-                  <div class="addr">204 Linden Avenue</div>
-                  <div class="meta"><span class="price">$1.85M</span> · 4 bd · 3 ba</div>
+                  <div class="addr">98 Academy Street</div>
+                  <div class="meta"><span class="price">$785K</span> · 4 bd · 3 ba</div>
                 </div>
                 <div class="right">
                   <div class="score">4.2</div>
@@ -203,8 +203,8 @@
               <div class="stop">
                 <div class="thumb photo b"><img class="ti" src="https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=200&q=70" onerror="this.remove()"><span class="idx">02</span></div>
                 <div class="info">
-                  <div class="addr">77 Serrano Drive</div>
-                  <div class="meta"><span class="price">$2.69M</span> · 6 bd · 7 ba</div>
+                  <div class="addr">178 Sedalia Court</div>
+                  <div class="meta"><span class="price">$925K</span> · 4 bd · 3 ba</div>
                 </div>
                 <div class="right">
                   <div class="score">3.6</div>
@@ -216,8 +216,8 @@
                 <div class="thumb photo c"><img class="ti" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=70" onerror="this.remove()"><span class="idx">03</span></div>
                 <div class="info">
                   <div class="now">Now</div>
-                  <div class="addr">513 Mills Street</div>
-                  <div class="meta"><span class="price">$2.87M</span> · 5 bd · 4 ba</div>
+                  <div class="addr">4110 Providence Square</div>
+                  <div class="meta"><span class="price">$1.15M</span> · 5 bd · 4 ba</div>
                 </div>
                 <div class="right">
                   <div class="score empty">Add take</div>
@@ -228,8 +228,8 @@
               <div class="stop">
                 <div class="thumb photo b"><img class="ti" src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=200&q=70" onerror="this.remove()"><span class="idx">04</span></div>
                 <div class="info">
-                  <div class="addr">9 Greenbrier Court</div>
-                  <div class="meta"><span class="price">$2.1M</span> · 4 bd · 3 ba</div>
+                  <div class="addr">205 Mayfield Circle</div>
+                  <div class="meta"><span class="price">$865K</span> · 4 bd · 3 ba</div>
                 </div>
                 <div class="right">
                   <div class="score empty">Add take</div>
@@ -240,8 +240,8 @@
               <div class="stop">
                 <div class="thumb photo"><img class="ti" src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&q=70" onerror="this.remove()"><span class="idx">05</span></div>
                 <div class="info">
-                  <div class="addr">1288 N Oceanview Drive</div>
-                  <div class="meta"><span class="price">$2.65M</span> · 5 bd · 5 ba</div>
+                  <div class="addr">2355 Hopewell Plantation</div>
+                  <div class="meta"><span class="price">$1.65M</span> · 5 bd · 5 ba</div>
                 </div>
                 <div class="right">
                   <div class="score empty">Add take</div>
@@ -272,8 +272,8 @@
               <div class="grad"></div>
               <div class="chip">Stop 3 of 12</div>
               <div class="info">
-                <div class="price">$2,870,000</div>
-                <div class="addr">513 Mills Street, Atherton CA</div>
+                <div class="price">$1,150,000</div>
+                <div class="addr">4110 Providence Square, Alpharetta GA</div>
                 <div class="stats">
                   <div class="stat"><b>5</b><span>Beds</span></div>
                   <div class="stat"><b>4</b><span>Baths</span></div>
@@ -348,5 +348,15 @@
       <div class="caption">The take — guided feedback</div>
     </div>
   </div>
+<script>
+document.querySelectorAll('.stop').forEach(function(st){
+  var a=st.querySelector('.addr'); var d=st.querySelector('.dirbtn');
+  if(a&&d&&/Directions/.test(d.textContent)){
+    d.style.cursor='pointer';
+    d.addEventListener('click',function(e){e.stopPropagation();
+      window.open('https://maps.apple.com/?daddr='+encodeURIComponent(a.textContent.trim()+', Alpharetta, GA'),'_blank');});
+  }
+});
+</script>
 </body>
 </html>
